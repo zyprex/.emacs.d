@@ -1,0 +1,141 @@
+* MEMO of org-mode
+** Motion
+   C-c C-n (org-next-visible-heading)
+   C-c C-p (org-previous-visible-heading)
+   C-c C-f (org-forward-heading-same-level)
+   C-c C-b (org-backward-heading-same-level)
+   C-c C-u (outline-up-heading)
+** Hide or Show
+   <TAB> (org-cycle)
+   <S-TAB> (org-shifttab)
+   Initial visibility:
+   #+BEGIN_SRC: org
+   #+STARTUP: overview
+   #+STARTUP: content
+   #+STARTUP: showall
+   #+STARTUP: showeverything
+   #+END_SRC
+
+** Edit Headlines
+   <C-RET> (org-insert-heading-respect-content)
+   C-c @ (org-mark-subtree)
+   C-c * (org-toggle-heading)
+
+** Edit TODO
+   <C-S-RET> (org-insert-todo-heading)
+   C-c C-t (org-todo)
+   C-c , (org-priority)
+   C-c C-c (org-toggle-checkbox)
+   C-c # (org-update-statistics-cookies)
+
+** Contextual Depending Keys
+*** Insert Same Level item
+    <M-RET> (org-meta-return)
+
+*** Move Same Level item
+    <M-left> (org-metaleft)
+    <M-right> (org-metaright)
+    <M-up> (org-metaup)
+    <M-down> (org-metadown)
+*** Change Same Level item's state
+    <S-up> (org-shiftup)
+    <S-down> (org-shiftdown)
+    <S-left> (org-shiftleft)
+    <S-right> (org-shiftright)
+*** TODO Ctrl C Ctrl C
+    C-c C-c (org-ctrl-c-ctrl-c)
+    List Partially Function:
+    - Update statistics cookie
+    - Jump between footnote and its definition
+    - toggle checkbox
+    - eval code block
+
+** Narrow in Org
+   C-x n s (org-narrow-to-subtree)
+   C-x n w (widen)
+
+** Hide Blocks
+   Hide "#+BEGIN... #+END" blocks:
+   #+BEGIN_SRC: org
+   #+STARTUP: hideblocks
+   #+STARTUP: nohideblocks
+   #+END_SRC
+
+** Rich Text Format
+*** Link
+    =[[link_name]][[description_optional]]=
+*** Check box
+    =- [x] checked=
+    =- [ ] unchecked=
+    =- [-] halfchecked [1/2]=
+*** Preserve Line Breaks
+    #+BEGIN_VERSE
+Everything should be made as simple as possible,
+but not any simpler ---Albert Einstein
+    #+END_VERSE
+*** Quote
+    #+BEGIN_QUOTE
+    Everything should be made as simple as possible,
+    but not any simpler ---Albert Einstein
+    #+END_QUOTE
+*** Center
+    #+BEGIN_CENTER
+    Everything should be made as simple as possible,
+    but not any simpler ---Albert Einstein
+    #+END_CENTER
+*** Empahsis
+    ==verbatim==   =verbatim=
+    =*bold*=      *bold*
+    =/italic/=    /italic/
+    =~code~=      ~code~
+    =+strike through+= +strike through+
+*** Subscripts Superscripts
+    =text_sub^sup=   text_sub^sup
+*** Literal Example
+    #+BEGIN_EXAMPLE
+      Some example from a text file.
+    #+END_EXAMPLE
+    #+BEGIN_SRC emacs-lisp
+    (defun org-xor (a b)
+      "Exclusive or."
+    (if a (not b) b))
+    #+END_SRC
+*** Image
+    C-c C-x C-v (org-toggle-inline-image)
+    #+BEGIN_EXAMPLE
+    #+CAPTION: This is the caption for the next figure link (or table)
+    #+NAME:   fig:SED-HR4049
+    [[./img/a.jpg]]
+    #+END_EXAMPLE
+*** Horizontal Rules
+    Line contains 5 more dashes
+*** Captions
+    #+BEGIN_EXAMPLE
+    #+CAPTION: caption for next table or link
+    #+END_EXAMPLE
+*** Table
+**** Create Table
+     #+BEGIN_EXAMPLE
+     | Name | Phone | Age |
+     |-
+     #+END_EXAMPLE
+     Use <TAB> in line end
+**** Insert bar in Table
+     =\vert=
+     TIP: C-c C-x \ (org-toggle-pretty-entities)
+*** Footnotes
+    C-c C-x f (org-footnote-action)
+    #+BEGIN_EXAMPLE
+    org homepage[fn:NAME]
+    [fn:NAME] The link is: https://orgmode.org
+    #+END_EXAMPLE
+
+* Read More
+  https://orgmode.org
+
+  # Local Variables:
+  # indent-tabs-mode: nil
+  # buffer-read-only: t
+  # coding: utf-8
+  # End:
+  # m-org-mode.org ends here

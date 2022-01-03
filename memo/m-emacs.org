@@ -1,0 +1,188 @@
+* MEMO of Emacs
+** Ask For Help
+   Prefix key: <F1> or C-h
+   v (describe-variable)
+   f (describe-function)
+   a (apropos-command)
+   m (describe-mode)
+   w (where-is)
+   c (describe-key-briefly)
+   k (describe-key)
+   e (view-echo-area-messages)
+   i (info)
+   r (info-emacs-manual) m (Info-menu)
+   S (info-lookup-symbol)
+   TIP1: use ? at last key stroke will list relevent keys.
+   TIP2: use C-u C-x = show character cod properties
+   TIP3: M-x describe-XXX
+         M-x what-XXX
+         M-x apropos-variable
+         M-x info-apropos
+** Start A Vanilla Emacs
+   $ emacs -Q -nw
+** Search
+*** Search String, Symbol
+    C-r (isearch-backward)
+    C-s (isearch-forward)
+    Isearch Map: C-s
+    M-c (isearch-toggle-case-fold)
+    M-r (isearch-toggle-regexp)
+    M-e (isearch-edit-string)
+    Prefix key: M-s
+    . (isearch-forward-symbol-at-point)
+    _ (isearch-forward-symbol)
+    o (occur)
+    w (isearch-forward-word)
+    TIP1: (multi-occur)
+    TIP2: see `isearch-mode-map', use C-s and M-s together.
+*** Search Use EWW
+    M-s M-w (eww-search-words)
+*** Search And Highlight
+    Prefix key: M-s h
+    . (highlight-symbol-at-point)
+    f (hi-lock-find-patterns)
+    l (highlight-lines-matching-regexp)
+    p (highlight-phrase)
+    r (highlight-regexp)
+    u (unhighlight-regexp)
+    w (hi-lock-write-interactive-patterns)
+** Replace
+*** Replace string, Symbol
+    M-% (query-replace)
+*** Replace Current Word
+    M-s . M-%
+*** Replace In Occur
+    M-x occur-edit-buffer
+** Mark
+   C-SPC (set-mark-command)
+   C-M-SPC (mark-sexp)
+   C-x h (mark-whole-buffer)
+   C-M-h (mark-defun)
+   C-x C-p (mark-page)
+** Rectange Mode
+   C-x SPC (rectange-mark-mode)
+   Prefix key: C-x r
+   t (string-rectangle)
+   k (kill-rectangle)
+   d (delete-rectangle)
+   c (clear-rectange)
+   N (rectange-number-lines)
+** Other Window/frame/tab
+   C-x 4 ... key relative to other window
+   C-x 5 ... key relative to frame
+   C-x t ... key relative to tab
+** Macro And Repeat
+   <F3> [???] <F4>
+   C-x ( [???] C-x )
+   C-x e (kmacro-end-and-call-macro) e e e
+   C-x z (repeat) z z z
+** Move
+*** Move by Page Boundary
+    C-x [ (backward-page)
+    C-x ] (forawrd-page)
+    TIP: Page boundaries are "formfeed character"
+    in Emacs as the escape sequence =^L=
+*** Move by Sexp
+    C-M-f (forward-sexp)
+    C-M-b (backward-sexp)
+*** Move by List (Parentheses)
+    C-M-n (forawrd-list)
+    C-M-p (backward-list)
+    C-M-d (down-list)
+    C-M-u (backward-up-list)
+*** Move by Defun
+    C-M-a (beginning-of-defun)
+    C-M-e (end-of-defun)
+*** Move in window
+    M-r (move-to-window-line-top-bottom)
+*** Move by Recenter
+    C-l (recenter-top-bottom)
+*** Scroll Other Window
+    C-M-v (scroll-other-window)
+    C-M-S-v (scroll-other-window-down)
+** Edit
+*** Save As
+    C-x C-w (write-file)
+*** Change Word Case
+    M-c (capitalize-word)
+    M-u (upcase-word)
+    M-l (downcase-word)
+*** Join Line
+    M-^ (delete-indentation)
+    M-x join line
+*** Swap
+    C-t (transpose-chars)
+    M-t (transpose-words)
+    C-x C-t (transpose-line)
+** Narrow
+   Prefix key: C-x n
+   n (narrow-to-region)
+   d (narrow-to-defun)
+   p (narrow-to-page)
+   w (widen)
+** Control Menu Bar
+   <F10> (menu-bar-open)
+** List Color Name
+   M-x list-color-display
+** Use Customize
+   M-x customize
+   M-x customize-group
+** Use Register
+*** Save Text
+    C-x r s [?] (copy-to-register)
+    M-x append-to-register RET [?]
+    M-x prepend-to-register RET [?]
+    M-x view-register
+    C-x r r [?] (copy-rectangle-to-register)
+    C-x r i [?] (insert-register)
+*** Save Position
+    C-x r SPC [?] (point-to-register)
+    C-x r j [?] (jump-to-register)
+*** Save Frames (All Windows) State
+    C-x r f [?] (frameset-to-register)
+    C-x r j [?] (jump-to-register)
+    NOTE: it can save windows layout
+*** Bookmark
+    C-x r m (bookmark-set)
+    C-x r b (bookmark-jump)
+    C-x r l (bookmark-bmenu-list)
+** Quirky Behavior
+   Input a new line in minibuffer, use <C-q><C-j>
+** Tips For Programmer
+   C-M-\ (indent-region)
+   C-x C-o (delete-blank-lines)
+   C-x C-; (comment-line)
+   M-; (comment-dwim)
+   M-x align-regexp
+   M-x follow-mode
+   M-j (default-indent-new-line)
+   M-x compile
+   M-x recompile
+   M-x hexlify-buffer
+   M-x dehexlify-buffer
+
+* Read More
+** About Emacs
+- https://www.gnu.org/software/emacs/ :: Emacs main page
+- https://www.emacswiki.org/ :: Emacs Wiki
+  - https://www.emacswiki.org/emacs/EmacsNiftyTricks
+  - https://www.emacswiki.org/emacs/NavigatingParentheses
+  - https://www.emacswiki.org/emacs/StarterKits
+  - https://www.emacswiki.org/emacs/EmacsJargon
+  - https://www.emacswiki.org/emacs/Glossary
+- https://wikemacs.org/ :: wiki emacs
+  - https://wikemacs.org/wiki/Category:Tutorial
+** Elisp Tutorial
+- https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html :: GNU elisp manual
+  - https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html
+- http://ergoemacs.org/ :: xahLee's Emacs Tutorial
+** Themes
+- https://emacsthemes.com/ :: Emacs Themes
+- https://peach-melpa.org/ :: Emacs Themes on Melpa
+
+# Local Variables:
+# indent-tabs-mode: nil
+# buffer-read-only: t
+# coding: utf-8
+# End:
+# m-emacs.org ends here

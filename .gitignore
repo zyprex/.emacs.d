@@ -1,0 +1,13 @@
+*
+!README.org
+!init.el
+!early-init.el
+!themes/
+!themes/**/*
+!memo/
+!memo/**/*
+!lisp/
+!lisp/**/*
+!snippets
+!snippets/**/*
+!.gitignore

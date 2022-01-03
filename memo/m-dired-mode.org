@@ -1,0 +1,44 @@
+* MEMO of dired-mode
+** Navigate
+^ (dired-up-directory)
+W (browse-url-of-dired-file)
+o (dired-find-file-other-window)
+j (dired-goto-file)
+e (dired-find-file)
+f (dired-find-file)
+v (dired-view-file)
+i (dired-maybe-insert-subdir)
+C-M-d (dired-tree-down)
+C-M-n (dired-next-subdir)
+C-M-p (dired-prev-subdir)
+C-M-u (dired-tree-up)
+k (dired-do-kill-lines)
+#+BEGIN_QUOTE:
+To kill an entire subdirectory (without killing its line in the
+parent directory), go to its directory header line and use this
+command with a prefix argument (the value does not matter).
+#+END_QUOTE
+** copy delete rename chgrp chown
+g (revert buffer)
++ (dired-create-directory)
+C (dired-do-copy)
+D (dired-do-delete)
+R (dired-do-rename)
+G (dired-do-chgrp)
+O (dired-do-chown)
+M (dired-do-chmod)
+Z (dired-do-compress)
+** bulk operations
+m (dired-mark)
+u (dired-unmark)
+U (dired-unmark-all-marks)
+d (dired-flag-file-deletion)
+x (dired-do-flagged-delete)
+* Read More
+
+# Local Variables:
+# indent-tabs-mode: nil
+# buffer-read-only: t
+# coding: utf-8
+# End:
+# m-dired-mode.org ends here

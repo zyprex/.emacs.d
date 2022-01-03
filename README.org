@@ -1,0 +1,3 @@
+* About
+  All configure should be self-explained, and start from `init.el`.
+  Technically, browse `init.el` is enough to be understand everything.

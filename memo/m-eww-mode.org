@@ -1,0 +1,23 @@
+* MEMO of eww-mode
+M-s M-w (eww-search-words)
+<M-RET> (eww-open-in-new-buffer)
+G (eww)
+l (eww-back-url)
+r (eww-forward-url)
+b (eww-add-bookmark)
+s (eww-switch-to-buffer)
+g (eww-reload)
+w (eww-copy-page-url)
+& (eww-browse-with-external-browser)
+B (eww-list-bookmarks)
+S (eww-list-buffers)
+H (eww-list-histories)
+R (eww-readable)
+E (eww-set-character-encoding)
+* Read More
+  # Local Variables:
+  # indent-tabs-mode: nil
+  # buffer-read-only: t
+  # coding: utf-8
+  # End:
+  # m-eww-mode.org ends here

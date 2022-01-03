@@ -1,0 +1,24 @@
+* MEMO of package-menu-mode
+  h (package-menu-quick-help)
+  C-m (package-menu-describe-package)
+  ? (package-menu-describe-package)
+  u (package-menu-mark-unmark)
+  d (package-menu-mark-delete)
+  i (package-menu-mark-install)
+  U (package-menu-mark-upgrades)
+  x (package-menu-execute)
+  r (revert-buffer)
+  / k (package-menu-filter-by-keyword)
+  / n (package-menu-filter-by-name)
+  / / (package-menu-clear-filter)
+  H (package-menu-hide-package)
+  ( (package-menu-toggle-hiding)
+
+* Read More
+  M-x describe-variable RET package-menu-mode-map
+  # Local Variables:
+  # indent-tabs-mode: nil
+  # buffer-read-only: t
+  # coding: utf-8
+  # End:
+  # m-package-menu-mode.org ends here

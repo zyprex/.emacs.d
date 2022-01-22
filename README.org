@@ -1,3 +1,6 @@
+* Quick start
+  First run =M-x package-get=.
+
 * About
-  All configure should be self-explained, and start from `init.el`.
-  Technically, browse `init.el` is enough to be understand everything.
+  All configure should be self-explained, and start from =init.el=.
+  Technically, browse =init.el= is enough to be understand everything.

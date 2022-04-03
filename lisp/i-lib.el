@@ -270,4 +270,79 @@ use `fc-list | fzf` search all fonts"
     (goto-char middle))
   (forward-char arg))
 
+(defun isearch-window-forward ()
+  ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
+  "Interactive search, limited to the visible portion of the buffer."
+  (interactive)
+  (save-restriction
+    (narrow-to-region (window-start) (window-end))
+    (isearch-forward)))
+
+(defun isearch-window-backward ()
+  ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
+  "Interactive search, limited to the visible portion of the buffer."
+  (interactive)
+  (save-restriction
+    (narrow-to-region (window-start) (window-end))
+    (isearch-backward)))
+
+(defun rabbit-jump-forward ()
+  (interactive)
+  (rabbit--jump (point) (window-end) "rabbit jump forward"))
+
+(defun rabbit-jump-backward ()
+  (interactive)
+  (rabbit--jump (point) (window-start) "rabbit jump backward"))
+
+(defun rabbit-jump-top ()
+  (interactive)
+  (rabbit--jump (window-start) (window-end) "rabbit jump top"))
+
+(defun rabbit-jump-bot ()
+  (interactive)
+  (rabbit--jump (window-end) (window-start) "rabbit jump bot"))
+
+(defun rabbit--jump (start-position end-position prompt-str)
+  "jump to screen lines first char"
+  (let ((start start-position)
+        (end end-position)
+        (table (make-vector
+                (* 2 (count-screen-lines (window-start) (window-end))) 0))
+        (idx 0)
+        (cur 0)
+        (lend 1)
+        (ch nil))
+    (if (> start end)
+        (setq start end-position end start-position rev 1)
+      (setq rev nil))
+    (while (and (< start end) (char-after start))
+      (progn
+        (setq cur (char-after start))
+        ;; exclude: tab space EOF ( ; " / * current_line
+        ;; and passed a line break
+        (if (and (not (or (member cur '(92 32 10 40 59 34 47 42))
+                          (= start (point))))
+                 (= lend 1))
+            (progn
+              (aset table idx cur)
+              (aset table (1+ idx) start)
+              (setq lend 0)
+              (setq idx (+ 2 idx))))
+        (if (= cur 10) (setq lend 1))
+        (setq start (1+ start))))
+    (setq ch (read-char (concat (propertize (format "%s" prompt-str)
+                                'face '(minibuffer-prompt default)))))
+    (dotimes (v (/ (length table) 2))
+      ;; c - current char code, i - the char's position
+      (let ((c 0) (i 0))
+        (if (eq rev 1)
+            (setq c (aref table (* 2 v))
+                  i (1+ (* 2 v)))
+          (setq c (aref table (- (length table) (* 2 v) 2))
+                i (1+ (- (length table) (* 2 v) 2))))
+        (if (eq c ch)
+            (goto-char (aref table i)))
+       ))
+    ))
+
 ;;; i-lib.el ends here

@@ -87,6 +87,15 @@ use TERM color as fallback"
     `(show-paren-match ((,class (:foreground ,hl4))))
     `(show-paren-mismatch ((,class (:foreground ,bg0 :background ,hl0))))
     `(vc-state-base ((,class (:foreground ,hl4))))
+;; outline
+    `(outline-1 ((,class (:foreground "cyan1" :weight bold))))
+    `(outline-2 ((,class (:foreground "SeaGreen1" :weight bold))))
+    `(outline-3 ((,class (:foreground "cyan3" :weight bold))))
+    `(outline-4 ((,class (:foreground "SeaGreen3" :weight bold))))
+    `(outline-5 ((,class (:foreground "LightGoldenrod1" :weight bold))))
+    `(outline-6 ((,class (:foreground "light salmon" :weight bold))))
+    `(outline-7 ((,class (:foreground "pale goldenrod" :weight bold))))
+    `(outline-8 ((,class (:foreground "OliveDrab1" :weight bold))))
 ;; 3rd part packages
     ;; > company
     `(company-tooltip ((,class (:foreground ,dm1 :background ,bg0))))

@@ -174,7 +174,7 @@ use `fc-list | fzf` search all fonts"
               (if (integer-or-marker-p current-prefix-arg)
                   current-prefix-arg
                 (car current-prefix-arg))
-            2))))
+            1))))
     (setq-local search-n-string search-str)
     (search-forward search-str)))
 
@@ -187,7 +187,7 @@ use `fc-list | fzf` search all fonts"
               (if (integer-or-marker-p current-prefix-arg)
                   current-prefix-arg
                 (car current-prefix-arg))
-            2))))
+            1))))
     (setq-local search-n-string search-str)
     (search-backward search-str)))
 
@@ -302,6 +302,11 @@ use `fc-list | fzf` search all fonts"
   (interactive)
   (rabbit--jump (window-end) (window-start) "rabbit jump bot"))
 
+(defun alphabet-p (char-num)
+  "check ascii char is a-z or A-Z"
+  (or (and (> char-num 96) (< char-num 123))
+       (and (> char-num 64) (< char-num 91))))
+
 (defun rabbit--jump (start-position end-position prompt-str)
   "jump to screen lines first char"
   (let ((start start-position)
@@ -320,8 +325,11 @@ use `fc-list | fzf` search all fonts"
         (setq cur (char-after start))
         ;; exclude: tab space EOF ( ; " / * current_line
         ;; and passed a line break
-        (if (and (not (or (member cur '(92 32 10 40 59 34 47 42))
-                          (= start (point))))
+        ;; (if (and (not (or (member cur '(92 32 10 40 59 34 47 42))
+        ;;                   (= start (point))))
+        ;;          (= lend 1))
+        (if (and (alphabet-p cur)
+                 (not (= start (point)))
                  (= lend 1))
             (progn
               (aset table idx cur)

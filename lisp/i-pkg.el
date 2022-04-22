@@ -15,7 +15,7 @@
     company
     imenu-anywhere
     imenu-list
-    ioccur ;; need replacement
+    ioccur
     dim
     eglot
     manage-minor-mode
@@ -23,7 +23,6 @@
     web-mode
     markdown-mode
     go-mode
-    rg
     chocolate-theme
     nord-theme
     srcery-theme
@@ -82,12 +81,16 @@
 (setq company-idle-delay 0
       company-minimum-prefix-length 2
       company-selection-wrap-around t
+      company-tooltip-maximum-width 60
       company-show-numbers t)
 ;; ========================================
 ;;                undo-tree
 ;; ========================================
 (global-undo-tree-mode)
-(setq undo-tree-mode-lighter "")
+(make-directory "~/.cache/emacs/undo" t)
+(setq undo-tree-mode-lighter ""
+      undo-tree-auto-save-history t
+      undo-tree-history-directory-alist '(("" . "~/.cache/emacs/undo")))
 ;; ========================================
 ;;                evil
 ;; https://evil.readthedocs.io/en/latest/overview.html

@@ -279,8 +279,6 @@ use `fc-list | fzf` search all fonts"
     (isearch-forward)))
 
 (defun isearch-window-backward ()
-  ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
-  "Interactive search, limited to the visible portion of the buffer."
   (interactive)
   (save-restriction
     (narrow-to-region (window-start) (window-end))
@@ -288,58 +286,80 @@ use `fc-list | fzf` search all fonts"
 
 (defun rabbit-jump-forward ()
   (interactive)
-  (rabbit--jump (point) (window-end) "rabbit jump forward"))
+  (setq-local rabbit-jump-char (rabbit-jump--read-char "forward"))
+  (rabbit-jump rabbit-jump-char (point) (window-end))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
 
 (defun rabbit-jump-backward ()
   (interactive)
-  (rabbit--jump (point) (window-start) "rabbit jump backward"))
+  (setq-local rabbit-jump-char (rabbit-jump--read-char "backward"))
+  (rabbit-jump rabbit-jump-char (point) (window-start))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
+
+(defun rabbit-jump-repeat-forward ()
+  (interactive)
+  (rabbit-jump rabbit-jump-char (point) (window-end))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
+
+(defun rabbit-jump-repeat-backward ()
+  (interactive)
+  (rabbit-jump rabbit-jump-char (point) (window-start))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
 
 (defun rabbit-jump-top ()
   (interactive)
-  (rabbit--jump (window-start) (window-end) "rabbit jump top"))
+  (setq-local rabbit-jump-char (rabbit-jump--read-char "top"))
+  (rabbit-jump rabbit-jump-char (window-start) (window-end))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
 
 (defun rabbit-jump-bot ()
   (interactive)
-  (rabbit--jump (window-end) (window-start) "rabbit jump bot"))
+  (setq-local rabbit-jump-char (rabbit-jump--read-char "bottom"))
+  (rabbit-jump rabbit-jump-char (window-end) (window-start))
+  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
+
+(defmacro rabbit-jump--transient-map (fn)
+  `(set-transient-map
+   (let ((kmap (make-sparse-keymap)))
+     (define-key kmap (kbd (char-to-string rabbit-jump-char)) ,fn)
+     kmap)))
 
 (defun alphabet-p (char-num)
   "check ascii char is a-z or A-Z"
   (or (and (> char-num 96) (< char-num 123))
-       (and (> char-num 64) (< char-num 91))))
+      (and (> char-num 64) (< char-num 91))))
 
-(defun rabbit--jump (start-position end-position prompt-str)
-  "jump to screen lines first char"
+(defun rabbit-jump--read-char (prompt-str)
+  (read-char
+   (concat (propertize (format "rabbit jump %s" prompt-str)
+                       'face '(minibuffer-prompt default)))))
+
+(defun rabbit-jump (ch start-position end-position)
+  "jump to line, in first CHAR between two position"
   (let ((start start-position)
         (end end-position)
         (table (make-vector
                 (* 2 (count-screen-lines (window-start) (window-end))) 0))
         (idx 0)
         (cur 0)
-        (lend 1)
-        (ch nil))
+        (lend 1))
     (if (> start end)
         (setq start end-position end start-position rev 1)
       (setq rev nil))
+    (setq end (1- end))
     (while (and (< start end) (char-after start))
       (progn
         (setq cur (char-after start))
-        ;; exclude: tab space EOF ( ; " / * current_line
-        ;; and passed a line break
-        ;; (if (and (not (or (member cur '(92 32 10 40 59 34 47 42))
-        ;;                   (= start (point))))
-        ;;          (= lend 1))
-        (if (and (alphabet-p cur)
-                 (not (= start (point)))
-                 (= lend 1))
+        ;; a char in alphabet, not in current line had over line end
+        (if (and (alphabet-p cur) (not (= start (point))) (= lend 1))
             (progn
               (aset table idx cur)
               (aset table (1+ idx) start)
               (setq lend 0)
               (setq idx (+ 2 idx))))
+        ;; over line end
         (if (= cur 10) (setq lend 1))
         (setq start (1+ start))))
-    (setq ch (read-char (concat (propertize (format "%s" prompt-str)
-                                'face '(minibuffer-prompt default)))))
     (dotimes (v (/ (length table) 2))
       ;; c - current char code, i - the char's position
       (let ((c 0) (i 0))
@@ -350,7 +370,7 @@ use `fc-list | fzf` search all fonts"
                 i (1+ (- (length table) (* 2 v) 2))))
         (if (eq c ch)
             (goto-char (aref table i)))
-       ))
+        ))
     ))
 
 ;;; i-lib.el ends here

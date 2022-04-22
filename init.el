@@ -383,8 +383,11 @@
 ;; prog
 (defun prog-mode-setup ()
   "Setup for programing mode"
-  (setq display-line-numbers-type 'relative)
+  ;; (setq display-line-numbers-type 'relative)
+  (setq display-line-numbers-type t)
+  (setq display-line-numbers-width 1)
   (display-line-numbers-mode)
+  ;; (linum-on)
   (setq-local fill-column 80)
   (display-fill-column-indicator-mode)
   (hl-line-mode)
@@ -416,8 +419,9 @@
                       tags-table-list local-tags-table-list))))
 (add-hook 'c-mode-hook #'c-mode-setup)
 ;; elisp
-;; (defun elisp-mode-setup () "Setup for elisp files")
-;; (add-hook 'emacs-lisp-mode-hook 'elisp-mode-setup)
+(defun elisp-mode-setup () "Setup for elisp files"
+       (modify-syntax-entry ?- "w" emacs-lisp-mode-syntax-table))
+(add-hook 'emacs-lisp-mode-hook 'elisp-mode-setup)
 ;; prog & text
 ;; html, web
 (defun html-web-mode-setup()

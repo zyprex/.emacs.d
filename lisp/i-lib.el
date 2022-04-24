@@ -51,7 +51,6 @@
           (kill-buffer buffer)))))
 
 (defun clear-register-alist () (interactive) (setq register-alist '()))
-
 ;; (defun clear-recentf-list () (interactive) (setq recentf-list '()))
 
 (defun move-line-down ()
@@ -243,10 +242,12 @@ use `fc-list | fzf` search all fonts"
         (search-backward (number-to-string number))
         (replace-match (number-to-string (funcall change number increment)))
         (goto-char point)))))
+
 (defun increment-number-at-point (&optional increment)
   "Increment number at point like vim's C-a"
   (interactive "p")
   (change-number-at-point '+ (or increment 1)))
+
 (defun decrement-number-at-point (&optional increment)
   "Decrement number at point like vim's C-x"
   (interactive "p")
@@ -284,6 +285,16 @@ use `fc-list | fzf` search all fonts"
     (narrow-to-region (window-start) (window-end))
     (isearch-backward)))
 
+(defun f2-quick-bind ()
+  "Bind F2 to last-command quickly"
+  (interactive)
+  (local-set-key [f2] last-command)
+  (message "F2 bind to last command: %s" last-command))
+
+
+;;
+;; rabbit jump
+;;
 (defun rabbit-jump-forward ()
   (interactive)
   (setq-local rabbit-jump-char (rabbit-jump--read-char "forward"))
@@ -369,8 +380,7 @@ use `fc-list | fzf` search all fonts"
           (setq c (aref table (- (length table) (* 2 v) 2))
                 i (1+ (- (length table) (* 2 v) 2))))
         (if (eq c ch)
-            (goto-char (aref table i)))
-        ))
-    ))
+            (goto-char (aref table i)))))))
+
 
 ;;; i-lib.el ends here

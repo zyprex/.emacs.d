@@ -54,7 +54,7 @@
    (eldoc-mode         ""   eldoc)
    (flymake-mode       ""   flymake)
    ;; (subword-mode       ""   subword)
-   (company-mode       ""   company)
+   ;; (company-mode       ""   company)
    (company-fuzzy-mode " *" company-fuzzy)
    (whitespace-mode    " _" whitespace)))
 ;; ========================================

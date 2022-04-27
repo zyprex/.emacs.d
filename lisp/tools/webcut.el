@@ -48,7 +48,7 @@
 
 (defun html-convert-newline (str)
   "Convert block element's newline to \n in string"
-  (setq case-fold-search t)
+  (let ((case-fold-search t))
   (replace-regexp-in-string
    (concat "<\\("
            (mapconcat
@@ -56,8 +56,8 @@
             '("/h[1-6]" "/p" "/li" "/div" "br ?/?") "\\|")
            "\\)>")
    "
-" str)
-  (setq case-fold-search (default-value 'case-fold-search)))
+" str)))
+;; (setq case-fold-search (default-value 'case-fold-search)))
 
 (defun html-remove-inline-js (str)
   (replace-regexp-in-string "<script.*>.*</script>" "" str))

@@ -285,11 +285,24 @@ use `fc-list | fzf` search all fonts"
     (narrow-to-region (window-start) (window-end))
     (isearch-backward)))
 
-(defun f2-quick-bind ()
-  "Bind F2 to last-command quickly"
-  (interactive)
-  (local-set-key [f2] last-command)
-  (message "F2 bind to last command: %s" last-command))
+(defun f2-quick-bind (&optional arg)
+  "Bind F2 to command quickly"
+  (interactive "Cf2 quick bind (default is last-command):")
+  (if (commandp arg)
+      (progn
+        (local-set-key [f2] arg)
+        (message "F2 bind to command: %s" arg))
+    (local-set-key [f2] last-command)
+    (message "F2 bind to last command: %s" last-command)))
+
+(defun get-buffers-same-mode (mode)
+  "Return a list of buffers where their major-mode is equal to MODE"
+  (let ((buffer-mode-matches '()))
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (eq mode major-mode)
+          (push buf buffer-mode-matches))))
+    buffer-mode-matches))
 
 
 ;;
@@ -382,5 +395,6 @@ use `fc-list | fzf` search all fonts"
         (if (eq c ch)
             (goto-char (aref table i)))))))
 
+(provide 'i-lib)
 
 ;;; i-lib.el ends here

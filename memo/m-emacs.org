@@ -161,6 +161,7 @@
    M-x recompile
    M-x hexlify-buffer
    M-x dehexlify-buffer
+   M-x untabify
 
 * Read More
 ** About Emacs

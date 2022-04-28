@@ -102,8 +102,13 @@ use TERM color as fallback"
     `(company-tooltip-common ((,class (:foreground ,hl2))))
     `(company-tooltip-selection ((,class (:background ,dm0))))
     `(company-tooltip-mouse ((,class (:foreground ,bg0 :background ,hl0))))
-    ;; > ioccur
-    `(ioccur-overlay-face ((,class (:foreground ,bg0 :background ,fg0))))
+    ;; > markdown
+    `(markdown-header-face-1 ((,class (:inherit 'outline-1))))
+    `(markdown-header-face-2 ((,class (:inherit 'outline-2))))
+    `(markdown-header-face-3 ((,class (:inherit 'outline-3))))
+    `(markdown-header-face-4 ((,class (:inherit 'outline-4))))
+    `(markdown-header-face-5 ((,class (:inherit 'outline-5))))
+    `(markdown-header-face-6 ((,class (:inherit 'outline-6))))
  )
 )
 

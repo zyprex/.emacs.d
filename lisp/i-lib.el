@@ -151,54 +151,54 @@ use `fc-list | fzf` search all fonts"
 ;;   (when recentf-list
 ;;     (find-file-existing (ido-completing-read "Find recentf: " recentf-list))))
 
-(defun read-n-char (n)
-  "Read n chars"
-  (let ((str "") (ch "") (i 0))
-    (while (< i n)
-      (setq ch (read-char
-                (concat
-                 (propertize (format "Read char(%d/%d): " i n)
-                             'face '(minibuffer-prompt default))
-                 str)))
-      (setq str (concat str (char-to-string ch)))
-      (setq i (1+ i)))
-      str))
+;; (defun read-n-char (n)
+;;   "Read n chars"
+;;   (let ((str "") (ch "") (i 0))
+;;     (while (< i n)
+;;       (setq ch (read-char
+;;                 (concat
+;;                  (propertize (format "Read char(%d/%d): " i n)
+;;                              'face '(minibuffer-prompt default))
+;;                  str)))
+;;       (setq str (concat str (char-to-string ch)))
+;;       (setq i (1+ i)))
+;;       str))
 
-(defun search-n-char-forward (arg)
-  "Search n chars forward"
-  (interactive "P")
-  (let ((search-str
-         (read-n-char
-          (if current-prefix-arg
-              (if (integer-or-marker-p current-prefix-arg)
-                  current-prefix-arg
-                (car current-prefix-arg))
-            1))))
-    (setq-local search-n-string search-str)
-    (search-forward search-str)))
+;; (defun search-n-char-forward (arg)
+;;   "Search n chars forward"
+;;   (interactive "P")
+;;   (let ((search-str
+;;          (read-n-char
+;;           (if current-prefix-arg
+;;               (if (integer-or-marker-p current-prefix-arg)
+;;                   current-prefix-arg
+;;                 (car current-prefix-arg))
+;;             1))))
+;;     (setq-local search-n-string search-str)
+;;     (search-forward search-str)))
 
-(defun search-n-char-backward (arg)
-  "Search n chars backward"
-  (interactive "P")
-  (let ((search-str
-         (read-n-char
-          (if current-prefix-arg
-              (if (integer-or-marker-p current-prefix-arg)
-                  current-prefix-arg
-                (car current-prefix-arg))
-            1))))
-    (setq-local search-n-string search-str)
-    (search-backward search-str)))
+;; (defun search-n-char-backward (arg)
+;;   "Search n chars backward"
+;;   (interactive "P")
+;;   (let ((search-str
+;;          (read-n-char
+;;           (if current-prefix-arg
+;;               (if (integer-or-marker-p current-prefix-arg)
+;;                   current-prefix-arg
+;;                 (car current-prefix-arg))
+;;             1))))
+;;     (setq-local search-n-string search-str)
+;;     (search-backward search-str)))
 
-(defun search-n-char-forward-repeat ()
-  "Repeat last `search-n-char-forward'"
-  (interactive)
-  (search-forward search-n-string))
+;; (defun search-n-char-forward-repeat ()
+;;   "Repeat last `search-n-char-forward'"
+;;   (interactive)
+;;   (search-forward search-n-string))
 
-(defun search-n-char-backward-repeat ()
-  "Repeat last `search-n-char-backward'"
-  (interactive)
-  (search-backward search-n-string))
+;; (defun search-n-char-backward-repeat ()
+;;   "Repeat last `search-n-char-backward'"
+;;   (interactive)
+;;   (search-backward search-n-string))
 
 (defmacro ft-init-function (regex fn)
   "Run file type function, when the open file match the REGEX"
@@ -230,28 +230,26 @@ use `fc-list | fzf` search all fonts"
   (let ((completion-styles '(basic partial-completion emacs22)))
     (call-interactively 'execute-extended-command)))
 
-(provide 'i-lib)
-
 ;; https://www.emacswiki.org/emacs/IncrementNumber
-(defun change-number-at-point (change increment)
-  (let ((number (number-at-point))
-        (point (point)))
-    (when number
-      (progn
-        (forward-word)
-        (search-backward (number-to-string number))
-        (replace-match (number-to-string (funcall change number increment)))
-        (goto-char point)))))
+;; (defun change-number-at-point (change increment)
+;;   (let ((number (number-at-point))
+;;         (point (point)))
+;;     (when number
+;;       (progn
+;;         (forward-word)
+;;         (search-backward (number-to-string number))
+;;         (replace-match (number-to-string (funcall change number increment)))
+;;         (goto-char point)))))
 
-(defun increment-number-at-point (&optional increment)
-  "Increment number at point like vim's C-a"
-  (interactive "p")
-  (change-number-at-point '+ (or increment 1)))
+;; (defun increment-number-at-point (&optional increment)
+;;   "Increment number at point like vim's C-a"
+;;   (interactive "p")
+;;   (change-number-at-point '+ (or increment 1)))
 
-(defun decrement-number-at-point (&optional increment)
-  "Decrement number at point like vim's C-x"
-  (interactive "p")
-  (change-number-at-point '- (or increment 1)))
+;; (defun decrement-number-at-point (&optional increment)
+;;   "Decrement number at point like vim's C-x"
+;;   (interactive "p")
+;;   (change-number-at-point '- (or increment 1)))
 
 ;; duplicate line
 (defun duplicate-line (&optional n)
@@ -262,28 +260,28 @@ use `fc-list | fzf` search all fonts"
   (dotimes (i (abs (or n 1)))
     (insert (thing-at-point 'line))))
 
-(defun middle-column (&optional arg)
-  "Go to middle of column"
-  (interactive "P")
-  (let* ((begin (line-beginning-position))
-         (end (line-end-position))
-         (middle (/ (+ end begin) 2)))
-    (goto-char middle))
-  (forward-char arg))
+;; (defun middle-column (&optional arg)
+;;   "Go to middle of column"
+;;   (interactive "P")
+;;   (let* ((begin (line-beginning-position))
+;;          (end (line-end-position))
+;;          (middle (/ (+ end begin) 2)))
+;;     (goto-char middle))
+;;   (forward-char arg))
 
-(defun isearch-window-forward ()
-  ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
-  "Interactive search, limited to the visible portion of the buffer."
-  (interactive)
-  (save-restriction
-    (narrow-to-region (window-start) (window-end))
-    (isearch-forward)))
+;; (defun isearch-window-forward ()
+;;   ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
+;;   "Interactive search, limited to the visible portion of the buffer."
+;;   (interactive)
+;;   (save-restriction
+;;     (narrow-to-region (window-start) (window-end))
+;;     (isearch-forward)))
 
-(defun isearch-window-backward ()
-  (interactive)
-  (save-restriction
-    (narrow-to-region (window-start) (window-end))
-    (isearch-backward)))
+;; (defun isearch-window-backward ()
+;;   (interactive)
+;;   (save-restriction
+;;     (narrow-to-region (window-start) (window-end))
+;;     (isearch-backward)))
 
 (defun f2-quick-bind (&optional arg)
   "Bind F2 to command quickly"
@@ -304,10 +302,29 @@ use `fc-list | fzf` search all fonts"
           (push buf buffer-mode-matches))))
     buffer-mode-matches))
 
+(defmacro define-fn-continuous (name key &rest body)
+  "Define function called NAME-continuous,
+ and this function can repeat its self by continuous press KEY"
+  (let ((fun-name (format "%s-continuous" name)))
+    `(defun ,(intern fun-name) ()
+       (interactive)
+       ,@body
+       (message (format "Press '%s' to repeat '%s'" ,key ,fun-name))
+       (set-transient-map
+        (let ((kmap (make-sparse-keymap)))
+          (define-key kmap ,key ',(intern fun-name))
+          kmap)))))
+
+(define-fn-continuous "other-window" (kbd "o") (other-window 1))
+(define-fn-continuous "next-buffer" (kbd "j") (next-buffer))
+(define-fn-continuous "previous-buffer" (kbd "k") (previous-buffer))
+
+
 
 ;;
 ;; rabbit jump
 ;;
+
 (defun rabbit-jump-forward ()
   (interactive)
   (setq-local rabbit-jump-char (rabbit-jump--read-char "forward"))

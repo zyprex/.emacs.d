@@ -4,11 +4,14 @@
 ;;
 ;;; Code:
 (require 'imenu)
+(require 'recentf)
 
 ;;;
 ;;;
 ;;; lvf core
 ;;;
+(defconst lvf-buffer-name "*lvf*" "The buffer name for lvf's temp buffer")
+
 (defvar lvf-minibuffer-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
@@ -65,17 +68,35 @@
   (interactive)
   (cancel-timer lvf-run-timer)
   (setq lvf-result "")
+  (lvf-local-buffer-keymap)
   (abort-recursive-edit)
   (lvf-leave-minibuffer))
+
+(defun lvf-local-buffer-keymap ()
+  (with-lvf-buffer-window
+   (read-only-mode 1)
+   (local-set-key (kbd "C-j")
+                  (lambda ()
+                    (interactive)
+                    (lvf-buf-act-fn)
+                    (next-line)))
+   (local-set-key (kbd "C-m") 'lvf-buf-act-fn)
+   (local-set-key (kbd "<return>") 'lvf-buf-act-fn)))
+
+(defun lvf-buf-act-fn()
+  (interactive)
+  (setq lvf-result (lvf-get-cursor-line))
+  (lvf-act-fn))
 
 (defun lvf-end ()
   "The execute end of lvf"
   (interactive)
   (cancel-timer lvf-run-timer)
+  (read-only-mode 1)
   (setq lvf-result (lvf-get-cursor-line))
+  (lvf-act-fn)
   (lvf-leave-window)
   (lvf-leave-minibuffer)
-  (lvf-act-fn)
   (setq lvf-result "")
   (setq lvf-prefix-len 0)
   (setq lvf-cache nil))
@@ -96,6 +117,7 @@
 
 (defun lvf-display (str)
   (with-lvf-buffer-window
+   (read-only-mode 0)
    (erase-buffer)
    (insert str)
    (goto-char (point-min))))
@@ -104,7 +126,7 @@
   "Do not use this function directly, it is main entrance of lvf."
   ;; save prev buffer context
   (setq lvf-prev-buffer (current-buffer))
-  (setq lvf-buffer (get-buffer-create "*lvf*"))
+  (setq lvf-buffer (get-buffer-create lvf-buffer-name))
   (switch-to-buffer-other-window lvf-buffer t)
   (lvf-build-source)
   (setq lvf-run-timer (run-with-idle-timer 1 30 'lvf-run-fn))
@@ -186,12 +208,13 @@
   (lvf-define-common-run-fn lvf-cache))
 
 (defun lvf-line--act-fn ()
-  (let ((line-num (string-to-number (string-trim (car (split-string lvf-result "|"))))))
+  (let ((line-num (string-to-number (car (split-string lvf-result "|")))))
     (with-lvf-prev-buffer-window
      (goto-char (point-min))
      (forward-line (1- line-num))
-     (recenter nil))))
+     (recenter))))
 
+;;;###autoload
 (lvf-define-type "line")
 
 
@@ -232,9 +255,44 @@
   (with-lvf-prev-buffer-window
    (let ((m (cdr (assoc lvf-result lvf-cache))))
      (switch-to-buffer (marker-buffer m))
-     (goto-char (marker-position m)))))
+     (goto-char (marker-position m))
+     (recenter))))
 
+;;;###autoload
 (lvf-define-type "imenu")
+
+;;;
+;;; lvf recentf
+;;;
+(defun lvf-recentf--build-source ()
+  (with-lvf-prev-buffer-window
+   (let ((f-list '())
+         (f-list-temp '()))
+     (dolist (b (cdr (buffer-list))) ;; first buffer is always lvf-prev-buffer
+       (if (buffer-file-name b)
+           (setq f-list (append f-list (list (concat "B|" (buffer-name b)))))
+         (if (not (string-match-p "^ \\*" (buffer-name b)))
+             (setq f-list-temp
+                   (append f-list-temp (list (concat "B|" (buffer-name b))))))))
+     (setq f-list (append f-list (delete (concat "B|" lvf-buffer-name) f-list-temp)))
+     (dolist (f recentf-list)
+       (if (not (member (get-file-buffer f) (buffer-list)))
+           (setq f-list (append f-list (list (concat "F|" f))))))
+     (setq lvf-prefix-len (string-match "|" (car f-list)))
+     (setq lvf-cache f-list))))
+
+(defun lvf-recentf--run-fn ()
+  (lvf-define-common-run-fn lvf-cache))
+
+(defun lvf-recentf--act-fn ()
+  (let* ((type (substring lvf-result 0 1))
+         (name (substring lvf-result 2)))
+    (cond
+     ((string= type "B") (pop-to-buffer name))
+     ((string= type "F") (find-file-other-window name)))))
+
+;;;###autoload
+(lvf-define-type "recentf")
 
 (provide 'i-lvf)
 

@@ -1,3 +1,5 @@
+* prerequisite
+- Emacs 27+
 * Quick start
   First run =M-x package-get=.
 

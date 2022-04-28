@@ -15,7 +15,6 @@
     company
     imenu-anywhere
     imenu-list
-    ioccur
     dim
     eglot
     manage-minor-mode
@@ -26,7 +25,8 @@
     chocolate-theme
     nord-theme
     srcery-theme
-    rainbow-mode) "Package list")
+    rainbow-mode)
+  "Package list")
 ;; allowed old gnu packages to be installed
 (setq package-check-signature nil)
 ;; check all package downloaded!

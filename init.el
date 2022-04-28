@@ -12,9 +12,9 @@
 ;; init
 (defun after-init-setup ()
 ;;; lazy load
-  ;; (setq lazy-load-time (current-time))
+  (setq lazy-load-time (float-time))
   (run-with-idle-timer
-   0.1 nil
+   0 nil
    (lambda ()
      ;; global minor mode
      ;; (desktop-save-mode)
@@ -41,11 +41,15 @@
          (minibuffer-depth-indicate-mode))
      (require 'i-pkg) ;; ~/.emacs.d/lisp/i-pkg.el
      (require 'i-abb) ;; ~/.emacs.d/lisp/i-abb.el
-     ;; (setq lazy-load-time (float-time (time-since lazy-load-time)))
+     (setq lazy-load-time (float-time (time-since lazy-load-time)))
+     (message (format "Emacs is armed to the teeth in %.6f seconds" lazy-load-time))
+     (setq lazy-load-time nil)
      (setq inhibit-message nil))) ;; end of all configuration!
   (run-with-idle-timer
    1 nil
    (lambda ()
+     (put 'narrow-to-region 'disabled nil)
+     (put 'narrow-to-page 'disabled nil)
      (with-eval-after-load 'calendar
        (setq
         calendar-chinese-celestial-stem
@@ -75,6 +79,7 @@
 ;;; prerequisites
   (add-to-list 'load-path (locate-user-emacs-file "lisp"))
   (require 'i-lib) ;; ~/.emacs.d/lisp/i-lib.el
+  (require 'i-lvf) ;; ~/.emacs.d/lisp/i-lvf.el
   ;; replace isearch but not the isearch-regex!
   ;; defined those keys early to undisturb minibuffer keymaps
   ;; (global-set-key-list
@@ -210,15 +215,15 @@
    '(("M-;" nil) ;; prefix key
      ("M-; M-;" comment-dwim)
      ("M-; m" bookmark-set)
-     ("M-; h" minimize-window)
-     ("M-; l" maximize-window)
      ("M-; w" winner-undo)
      ("M-; W" winner-redo)
-     ("M-; o" other-window)
+     ("M-; o" other-window-continuous)
      ("M-; c" delete-other-windows)
      ("M-; C" delete-window)
-     ("M-; j" next-buffer)
-     ("M-; k" previous-buffer)
+     ("M-; h" minimize-window)
+     ("M-; l" maximize-window)
+     ("M-; j" next-buffer-continuous)
+     ("M-; k" previous-buffer-continuous)
      ("M-; b" ido-switch-buffer)
      ("M-; M-b" ido-switch-buffer-other-window)
      ("M-; <SPC>b" ibuffer)
@@ -228,14 +233,14 @@
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
      ;; need package in ~/.emacs.d/lisp/i-pkg.el
-     ("M-; /" ioccur)
+     ("M-; /" lvf-line)
      ("M-; ?" imenu)
      ("M-; M-?" imenu-anywhere)
-     ;; also see `windmove-default-keybindings'
-     ([left]  windmove-left)
-     ([right] windmove-right)
-     ([up]    windmove-up)
-     ([down]  windmove-down)
+     ;; see `windmove-default-keybindings'
+     ;; ([left]  windmove-left)
+     ;; ([right] windmove-right)
+     ;; ([up]    windmove-up)
+     ;; ([down]  windmove-down)
      ;; adjust defaults
      ("M-; M-:" eval-region)
      ("M-; M-z" zap-up-to-char)
@@ -250,16 +255,13 @@
      ("<C-S-right>"  duplicate-line)
      ("M-; d" duplicate-line)
      ("M-; M-x" exex-cmd)
-     ;; ("M-; M-j" search-n-char-forward)
-     ;; ("M-; M-k" search-n-char-backward)
-     ;; ("M-; ;" search-n-char-forward-repeat)
-     ;; ("M-; ," search-n-char-backward-repeat)
      ("M-; M-s" isearch-window-forward)
      ("M-; M-r" isearch-window-backward)
      ("M-n" rabbit-jump-forward)
      ("M-p" rabbit-jump-backward)
      ("M-; M-n" rabbit-jump-bot)
      ("M-; M-p" rabbit-jump-top)
+     ([f2] nil) ;; redefined
      ;; ([f5] nil)
      ;; ([f6] nil)
      ;; ([f7] compile)
@@ -267,12 +269,12 @@
      ;; ([f9] nil)
      ;; ([f12]) nil)
      ))
-  (with-eval-after-load 'evil
-    ;; (evil-global-set-key 'normal (kbd "C-.") 'next-buffer)
-    (evil-global-set-key 'normal [left]  'windmove-left)
-    (evil-global-set-key 'normal [right] 'windmove-right)
-    (evil-global-set-key 'normal [up]    'windmove-up)
-    (evil-global-set-key 'normal [down]  'windmove-down))
+  ;; (with-eval-after-load 'evil
+  ;;   ;; (evil-global-set-key 'normal (kbd "C-.") 'next-buffer)
+  ;;   (evil-global-set-key 'normal [left]  'windmove-left)
+  ;;   (evil-global-set-key 'normal [right] 'windmove-right)
+  ;;   (evil-global-set-key 'normal [up]    'windmove-up)
+  ;;   (evil-global-set-key 'normal [down]  'windmove-down))
 
 ;;; local settings
   (make-directory "~/.emacs.d/data" t)
@@ -419,12 +421,14 @@
                       tags-table-list local-tags-table-list))))
 (add-hook 'c-mode-hook #'c-mode-setup)
 ;; elisp
-(defun elisp-mode-setup () "Setup for elisp files"
-       (modify-syntax-entry ?- "w" emacs-lisp-mode-syntax-table))
+(defun elisp-mode-setup ()
+  "Setup for elisp files"
+  (modify-syntax-entry ?- "w" emacs-lisp-mode-syntax-table))
 (add-hook 'emacs-lisp-mode-hook 'elisp-mode-setup)
 ;; prog & text
 ;; html, web
 (defun html-web-mode-setup()
+  (setq-local tab-width 2)
   (define-key web-mode-map (kbd "M-;") nil)
   (define-key web-mode-map (kbd "M-; M-;") 'web-mode-comment-or-uncomment)
   ;; (setq-local tab-width 2)
@@ -448,5 +452,3 @@
 
 
 ;;; init.el ends here
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)

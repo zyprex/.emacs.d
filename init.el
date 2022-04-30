@@ -30,10 +30,10 @@
            savehist-autosave-interval 60)
      (save-place-mode)
      (setq save-place-limit 400)
-     (show-paren-mode)
+     ;; (show-paren-mode) ;; since emacs28+ no need for this line
      (setq show-paren-when-point-inside-paren t
            show-paren-when-point-in-periphery t)
-     (winner-mode) ;; C-c <left> and C-c <right>
+     ;; (winner-mode) ;; C-c <left> and C-c <right>
      (global-auto-revert-mode)
      (delete-selection-mode)
      (global-so-long-mode)
@@ -43,7 +43,6 @@
      (require 'i-abb) ;; ~/.emacs.d/lisp/i-abb.el
      (setq lazy-load-time (float-time (time-since lazy-load-time)))
      (message (format "Emacs is armed to the teeth in %.6f seconds" lazy-load-time))
-     (setq lazy-load-time nil)
      (setq inhibit-message nil))) ;; end of all configuration!
   (run-with-idle-timer
    1 nil
@@ -215,15 +214,16 @@
    '(("M-;" nil) ;; prefix key
      ("M-; M-;" comment-dwim)
      ("M-; m" bookmark-set)
-     ("M-; w" winner-undo)
-     ("M-; W" winner-redo)
-     ("M-; o" other-window-continuous)
+     ;; ("M-; w" winner-undo)
+     ;; ("M-; W" winner-redo)
      ("M-; c" delete-other-windows)
      ("M-; C" delete-window)
-     ("M-; h" minimize-window)
-     ("M-; l" maximize-window)
+     ("M-; h" save-window-layout)
+     ("M-; l" load-window-layout)
      ("M-; j" next-buffer-continuous)
-     ("M-; k" previous-buffer-continuous)
+     ("M-; k" prev-buffer-continuous)
+     ("M-; o" other-window-next-continuous)
+     ("M-; i" other-window-prev-continuous)
      ("M-; b" ido-switch-buffer)
      ("M-; M-b" ido-switch-buffer-other-window)
      ("M-; <SPC>b" ibuffer)

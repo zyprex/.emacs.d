@@ -315,9 +315,50 @@ use `fc-list | fzf` search all fonts"
           (define-key kmap ,key ',(intern fun-name))
           kmap)))))
 
-(define-fn-continuous "other-window" (kbd "o") (other-window 1))
+(define-fn-continuous "other-window-prev" (kbd "i") (other-window -1))
+(define-fn-continuous "other-window-next" (kbd "o") (other-window 1))
 (define-fn-continuous "next-buffer" (kbd "j") (next-buffer))
-(define-fn-continuous "previous-buffer" (kbd "k") (previous-buffer))
+(define-fn-continuous "prev-buffer" (kbd "k") (previous-buffer))
+
+
+(defvar window-layout-list '() "Store windows layouts")
+
+(defun save-window-layout ()
+  "Save current window layout to alias (a char)"
+  (interactive)
+  (let ((i '(:alias nil :name nil :layout nil))
+        (ch (read-char "Set current windows layout alias (press one key)...")))
+    ;; clear duplicates
+    (dolist (l window-layout-list)
+      (if (= ch (plist-get l :alias))
+          (setq window-layout-list (remove l window-layout-list))))
+    (setq i (plist-put i :alias ch))
+    (setq i (plist-put i :name (buffer-name)))
+    (setq i (plist-put i :layout (current-window-configuration)))
+    (add-to-list 'window-layout-list (copy-tree i))))
+
+(defun load-window-layout ()
+  "Load a window layout from `window-layout-list'"
+  (interactive)
+  (let* ((echo-prompt
+          (mapcar
+           (lambda (x)
+             (concat
+              (propertize (format "%c:" (plist-get x :alias))
+                          'face 'minibuffer-prompt)
+              (format "%s" (plist-get x :name))))
+           window-layout-list))
+         (echo-prompt
+          (sort
+           echo-prompt
+           (lambda (str1 str2)
+             (< (string-to-char (substring str1 0 1))
+                (string-to-char (substring str2 0 1))))))
+         (echo-prompt (mapconcat (lambda (x) x) echo-prompt " "))
+         (ch (read-char echo-prompt)))
+    (dolist (l window-layout-list)
+      (if (= ch (plist-get l :alias))
+          (set-window-configuration (plist-get l :layout))))))
 
 
 

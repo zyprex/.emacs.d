@@ -128,6 +128,8 @@
   (setq lvf-prev-buffer (current-buffer))
   (setq lvf-buffer (get-buffer-create lvf-buffer-name))
   (switch-to-buffer-other-window lvf-buffer t)
+  (if cursor-in-non-selected-windows
+      (setq-local cursor-in-non-selected-windows t))
   (lvf-build-source)
   (setq lvf-run-timer (run-with-idle-timer 1 30 'lvf-run-fn))
   (add-to-history

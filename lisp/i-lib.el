@@ -230,6 +230,11 @@ use `fc-list | fzf` search all fonts"
   (let ((completion-styles '(basic partial-completion emacs22)))
     (call-interactively 'execute-extended-command)))
 
+(defmacro def-ex-prog-cmd (cmd-name where)
+  "Define the command that execute exteral program"
+  `(defun ,(intern cmd-name) ()
+       (interactive) (start-process ,cmd-name nil ,where)))
+
 ;; https://www.emacswiki.org/emacs/IncrementNumber
 ;; (defun change-number-at-point (change increment)
 ;;   (let ((number (number-at-point))
@@ -319,7 +324,6 @@ use `fc-list | fzf` search all fonts"
 (define-fn-continuous "other-window-next" (kbd "o") (other-window 1))
 (define-fn-continuous "next-buffer" (kbd "j") (next-buffer))
 (define-fn-continuous "prev-buffer" (kbd "k") (previous-buffer))
-
 
 (defvar window-layout-list '() "Store windows layouts")
 

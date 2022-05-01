@@ -42,8 +42,7 @@
 ;; ========================================
 ;;                which-key
 ;; ========================================
-(setq which-key-idle-delay 2
-      which-key-popup-type 'side-window)
+(setq which-key-idle-delay 3)
 (which-key-mode)
 ;; ========================================
 ;;                dim
@@ -90,6 +89,7 @@
 (global-undo-tree-mode)
 (setq undo-tree-mode-lighter ""
       undo-tree-auto-save-history t
+      undo-tree-
       undo-tree-history-directory-alist '(("" . "~/.cache/emacs/undo")))
 ;; ========================================
 ;;                evil

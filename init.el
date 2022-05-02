@@ -11,59 +11,28 @@
 
 ;;; INIT ROUTINE
 (defun after-init-setup ()
-;;; lazy load
-  (setq lazy-load-time (float-time))
+  ;;; prerequisites
+  (add-to-list 'load-path (locate-user-emacs-file "lisp"))
+  (require 'i-lib) ;; ~/.emacs.d/lisp/i-lib.el
+  ;;; local settings
+  (init-settings-local)
+  ;;; defaults
+  (init-settings-defaults)
+  ;;; keymaps
+  (init-settings-keymaps)
+  ;;; lazy load
   (run-with-idle-timer
    0 nil
    (lambda ()
-     ;; global minor mode
-     ;; (desktop-save-mode)
-     ;; (setq desktop-save 'ask-if-exists
-     ;;       desktop-auto-save-timeout nil)
-     (recentf-mode)
-     (setq recentf-exclude '()
-           recentf-max-menu-items 20
-           recentf-max-saved-items 99)
-     (savehist-mode)
-     (setq savehist-additional-variables
-           '(register-alist)
-           savehist-autosave-interval 60)
-     (save-place-mode)
-     (setq save-place-limit 400)
-     ;; (show-paren-mode) ;; since emacs28+ no need for this line
-     (setq show-paren-when-point-inside-paren t
-           show-paren-when-point-in-periphery t)
-     ;; (winner-mode) ;; C-c <left> and C-c <right>
-     (global-auto-revert-mode)
-     (delete-selection-mode)
-     (global-so-long-mode)
-     (if enable-recursive-minibuffers
-         (minibuffer-depth-indicate-mode))
+     (init-settings-delay)
      (require 'i-pkg) ;; ~/.emacs.d/lisp/i-pkg.el
      (require 'i-abb) ;; ~/.emacs.d/lisp/i-abb.el
-     (setq lazy-load-time (float-time (time-since lazy-load-time)))
-     (message (format "Emacs is armed to the teeth in %.6f seconds" lazy-load-time))
-     (setq inhibit-message nil))) ;; end of all configuration!
-  (run-with-idle-timer
-   1 nil
-   (lambda ()
-     (put 'narrow-to-region 'disabled nil)
-     (put 'narrow-to-page 'disabled nil)
-     (with-eval-after-load 'calendar
-       (setq
-        calendar-chinese-celestial-stem
-        ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"]
-        calendar-chinese-terrestrial-branch
-        ["子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥"]
-        calendar-chinese-all-holidays-flag t
-        calendar-latitude +120.214928
-        calendar-longitude +30.252465
-        ;; calendar-location-name ""
-        calendar-mark-holidays-flag t
-        calendar-mark-diary-entries-flag t
-        calendar-view-holidays-initially-flag t)
-       ;; p C
-       (add-hook 'calendar-today-visible-hook 'calendar-mark-today))
+     (require 'i-lvf) ;; ~/.emacs.d/lisp/i-lvf.el
+     (require 'i-jmp) ;; ~/.emacs.d/lisp/i-jmp.el
+     (setq inhibit-message nil)
+     (setq emacs-prepare-time (float-time (time-since emacs-prepare-time)))
+     (message (format "Emacs is armed to the teeth in %.6f seconds"
+                      emacs-prepare-time))
      ))
   (run-with-idle-timer
    9 nil
@@ -74,20 +43,53 @@
    300 nil
    (lambda ()
      (setq confirm-kill-emacs 'yes-or-no-p)))
+  (message "Done: after-init-setup"))
+(add-hook 'after-init-hook 'after-init-setup)
 
-;;; prerequisites
-  (add-to-list 'load-path (locate-user-emacs-file "lisp"))
-  (require 'i-lib) ;; ~/.emacs.d/lisp/i-lib.el
-  (require 'i-lvf) ;; ~/.emacs.d/lisp/i-lvf.el
-  ;; replace isearch but not the isearch-regex!
-  ;; defined those keys early to undisturb minibuffer keymaps
-  ;; (global-set-key-list
-  ;;  '(("C-s"   search-n-char-forward)
-  ;;    ("C-r"   search-n-char-backward)
-  ;;    ("C-S-s" search-n-char-forward-repeat)
-  ;;    ("C-S-r" search-n-char-backward-repeat)))
+(defun init-settings-delay ()
+  ;; global minor mode
+  ;; (desktop-save-mode)
+  ;; (setq desktop-save 'ask-if-exists
+  ;;       desktop-auto-save-timeout nil)
+  (recentf-mode)
+  (setq recentf-exclude '()
+        recentf-max-menu-items 20
+        recentf-max-saved-items 99)
+  (savehist-mode)
+  (setq savehist-additional-variables
+        '(register-alist)
+        savehist-autosave-interval 60)
+  (save-place-mode)
+  (setq save-place-limit 400)
+  ;; (show-paren-mode) ;; since emacs28+ no need for this line
+  (setq show-paren-when-point-inside-paren t
+        show-paren-when-point-in-periphery t)
+  ;; (winner-mode) ;; C-c <left> and C-c <right>
+  (if enable-recursive-minibuffers
+      (minibuffer-depth-indicate-mode))
+  (global-auto-revert-mode)
+  (delete-selection-mode)
+  (global-so-long-mode)
+  (put 'narrow-to-region 'disabled nil)
+  (put 'narrow-to-page 'disabled nil)
+  (with-eval-after-load 'calendar
+    (setq
+     calendar-chinese-celestial-stem
+     ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"]
+     calendar-chinese-terrestrial-branch
+     ["子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥"]
+     calendar-chinese-all-holidays-flag t
+     calendar-latitude +120.214928
+     calendar-longitude +30.252465
+     ;; calendar-location-name ""
+     calendar-mark-holidays-flag t
+     calendar-mark-diary-entries-flag t
+     calendar-view-holidays-initially-flag t)
+    ;; p C
+    (add-hook 'calendar-today-visible-hook 'calendar-mark-today))
+  (message "Done: init-settings-delay"))
 
-;;; defaults
+(defun init-settings-defaults ()
   ;; (add-hook-list '(prog-mode-hook text-mode-hook) 'subword-mode)
   ;; (setq initial-buffer-choice "~/.emacs.d/init.el")
   (setq
@@ -112,7 +114,7 @@
    scroll-margin 0
    hscroll-step 0
    hscroll-margin 0
-   scroll-conservatively 0
+   scroll-conservatively 101
    scroll-up-aggressively 0.0
    scroll-down-aggressively 0.0
    scroll-preserve-screen-position t
@@ -211,8 +213,10 @@
   ;; imenu
   (setq imenu-max-items 250
         imenu-use-popup-menu nil)
+  (message "Done: init-settings-defaults"))
 
-;;; keymaps
+
+(defun init-settings-keymaps ()
   (global-set-key-list
    '(("M-;" nil) ;; prefix key
      ("M-; M-;" comment-dwim)
@@ -272,14 +276,9 @@
      ;; ([f9] nil)
      ;; ([f12]) nil)
      ))
-  ;; (with-eval-after-load 'evil
-  ;;   ;; (evil-global-set-key 'normal (kbd "C-.") 'next-buffer)
-  ;;   (evil-global-set-key 'normal [left]  'windmove-left)
-  ;;   (evil-global-set-key 'normal [right] 'windmove-right)
-  ;;   (evil-global-set-key 'normal [up]    'windmove-up)
-  ;;   (evil-global-set-key 'normal [down]  'windmove-down))
+  (message "Done: init-settings-keymaps"))
 
-;;; local settings
+(defun init-settings-local ()
   (defvar local-data-dir "~/.emacs.d/data"
     "Put many data here to keep user emacs directory tidy")
   (defmacro local-data (f) `(expand-file-name ,f local-data-dir))
@@ -290,10 +289,11 @@
         save-place-file              (local-data "places")
         bookmark-default-file        (local-data "bookmarks")
         native-comp-eln-load-path    (append (list (local-data "eln-cache/"))
-                                          native-comp-eln-load-path)
+                                             native-comp-eln-load-path)
         eww-bookmarks-directory      (local-data "")
         url-configuration-directory  (local-data "url/")
-        eshell-directory-name        (local-data "eshell/"))
+        eshell-directory-name        (local-data "eshell/")
+        auto-save-list-file-prefix   (local-data "auto-save-list/.saves-"))
   (setq native-comp-eln-load-path (delete (expand-file-name "eln-cache/" user-emacs-directory)
                                           native-comp-eln-load-path))
 
@@ -314,8 +314,8 @@
         "(setq local-tags-table-list '())"
         "(setq local-c-compile-command \"make -k \")"
         ";;; -- auto generated by 'init.el'--" ))
-     nil local-init-file)))
-(add-hook 'after-init-hook 'after-init-setup)
+     nil local-init-file))
+  (message "Done: init-settings-local"))
 
 ;; terminal
 ;; (defun tty-setup-init ())
@@ -468,6 +468,11 @@
   (define-key markdown-mode-map (kbd "M-n") nil)
   (define-key markdown-mode-map (kbd "M-p") nil))
 (add-hook 'markdown-mode-hook 'markdown-mode-setup)
+
+(defun start-byte-compile ()
+  (interactive)
+  (byte-recompile-directory "~/.emacs.d/lisp/" 0)
+  (byte-compile-file "~/.emacs.d/init.el"))
 
 
 ;; use menu

@@ -127,11 +127,10 @@ use `fc-list | fzf` search all fonts"
 
 (defun package-sync ()
   "Ensure all required package downloaded"
-  (let ((pkg))
   (catch 'e
     (dolist (pkg package-list)
       (when (not (require 'pkg nil 'noerror))
-        (throw 'e (package-get)))))))
+        (throw 'e (package-get))))))
 
 (defun ido-find-tag ()
   "Find a tag using ido"
@@ -143,62 +142,6 @@ use `fc-list | fzf` search all fonts"
 	      (push (prin1-to-string x t) tags-names)))
 	  tags-completion-table)
     (xref-find-definitions (ido-completing-read "TAGS:" tags-names))))
-
-;; (defun ido-recentf-open ()
-;;   ;; because of `ido-use-virtual-buffers', this function becomes useless
-;;   "Use `ido-completing-read' to find a recent file"
-;;   (interactive)
-;;   (when recentf-list
-;;     (find-file-existing (ido-completing-read "Find recentf: " recentf-list))))
-
-;; (defun read-n-char (n)
-;;   "Read n chars"
-;;   (let ((str "") (ch "") (i 0))
-;;     (while (< i n)
-;;       (setq ch (read-char
-;;                 (concat
-;;                  (propertize (format "Read char(%d/%d): " i n)
-;;                              'face '(minibuffer-prompt default))
-;;                  str)))
-;;       (setq str (concat str (char-to-string ch)))
-;;       (setq i (1+ i)))
-;;       str))
-
-;; (defun search-n-char-forward (arg)
-;;   "Search n chars forward"
-;;   (interactive "P")
-;;   (let ((search-str
-;;          (read-n-char
-;;           (if current-prefix-arg
-;;               (if (integer-or-marker-p current-prefix-arg)
-;;                   current-prefix-arg
-;;                 (car current-prefix-arg))
-;;             1))))
-;;     (setq-local search-n-string search-str)
-;;     (search-forward search-str)))
-
-;; (defun search-n-char-backward (arg)
-;;   "Search n chars backward"
-;;   (interactive "P")
-;;   (let ((search-str
-;;          (read-n-char
-;;           (if current-prefix-arg
-;;               (if (integer-or-marker-p current-prefix-arg)
-;;                   current-prefix-arg
-;;                 (car current-prefix-arg))
-;;             1))))
-;;     (setq-local search-n-string search-str)
-;;     (search-backward search-str)))
-
-;; (defun search-n-char-forward-repeat ()
-;;   "Repeat last `search-n-char-forward'"
-;;   (interactive)
-;;   (search-forward search-n-string))
-
-;; (defun search-n-char-backward-repeat ()
-;;   "Repeat last `search-n-char-backward'"
-;;   (interactive)
-;;   (search-backward search-n-string))
 
 (defmacro ft-init-function (regex fn)
   "Run file type function, when the open file match the REGEX"
@@ -235,27 +178,6 @@ use `fc-list | fzf` search all fonts"
   `(defun ,(intern cmd-name) ()
        (interactive) (start-process ,cmd-name nil ,where)))
 
-;; https://www.emacswiki.org/emacs/IncrementNumber
-;; (defun change-number-at-point (change increment)
-;;   (let ((number (number-at-point))
-;;         (point (point)))
-;;     (when number
-;;       (progn
-;;         (forward-word)
-;;         (search-backward (number-to-string number))
-;;         (replace-match (number-to-string (funcall change number increment)))
-;;         (goto-char point)))))
-
-;; (defun increment-number-at-point (&optional increment)
-;;   "Increment number at point like vim's C-a"
-;;   (interactive "p")
-;;   (change-number-at-point '+ (or increment 1)))
-
-;; (defun decrement-number-at-point (&optional increment)
-;;   "Decrement number at point like vim's C-x"
-;;   (interactive "p")
-;;   (change-number-at-point '- (or increment 1)))
-
 ;; duplicate line
 (defun duplicate-line (&optional n)
   "Duplicate Current Line, make more than 1 copy if given a numeric argument"
@@ -264,29 +186,6 @@ use `fc-list | fzf` search all fonts"
   (move-beginning-of-line 1)
   (dotimes (i (abs (or n 1)))
     (insert (thing-at-point 'line))))
-
-;; (defun middle-column (&optional arg)
-;;   "Go to middle of column"
-;;   (interactive "P")
-;;   (let* ((begin (line-beginning-position))
-;;          (end (line-end-position))
-;;          (middle (/ (+ end begin) 2)))
-;;     (goto-char middle))
-;;   (forward-char arg))
-
-;; (defun isearch-window-forward ()
-;;   ;; Origin from https://stackoverflow.com/questions/11569635/isearch-occur-visible-area-in-emacs/11569806#11569806
-;;   "Interactive search, limited to the visible portion of the buffer."
-;;   (interactive)
-;;   (save-restriction
-;;     (narrow-to-region (window-start) (window-end))
-;;     (isearch-forward)))
-
-;; (defun isearch-window-backward ()
-;;   (interactive)
-;;   (save-restriction
-;;     (narrow-to-region (window-start) (window-end))
-;;     (isearch-backward)))
 
 (defun f2-quick-bind (&optional arg)
   "Bind F2 to command quickly"
@@ -363,99 +262,6 @@ use `fc-list | fzf` search all fonts"
     (dolist (l window-layout-list)
       (if (= ch (plist-get l :alias))
           (set-window-configuration (plist-get l :layout))))))
-
-
-
-;;
-;; rabbit jump
-;;
-
-(defun rabbit-jump-forward ()
-  (interactive)
-  (setq-local rabbit-jump-char (rabbit-jump--read-char "forward"))
-  (rabbit-jump rabbit-jump-char (point) (window-end))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
-
-(defun rabbit-jump-backward ()
-  (interactive)
-  (setq-local rabbit-jump-char (rabbit-jump--read-char "backward"))
-  (rabbit-jump rabbit-jump-char (point) (window-start))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
-
-(defun rabbit-jump-repeat-forward ()
-  (interactive)
-  (rabbit-jump rabbit-jump-char (point) (window-end))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
-
-(defun rabbit-jump-repeat-backward ()
-  (interactive)
-  (rabbit-jump rabbit-jump-char (point) (window-start))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
-
-(defun rabbit-jump-top ()
-  (interactive)
-  (setq-local rabbit-jump-char (rabbit-jump--read-char "top"))
-  (rabbit-jump rabbit-jump-char (window-start) (window-end))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-forward))
-
-(defun rabbit-jump-bot ()
-  (interactive)
-  (setq-local rabbit-jump-char (rabbit-jump--read-char "bottom"))
-  (rabbit-jump rabbit-jump-char (window-end) (window-start))
-  (rabbit-jump--transient-map 'rabbit-jump-repeat-backward))
-
-(defmacro rabbit-jump--transient-map (fn)
-  `(set-transient-map
-   (let ((kmap (make-sparse-keymap)))
-     (define-key kmap (kbd (char-to-string rabbit-jump-char)) ,fn)
-     kmap)))
-
-(defun alphabet-p (char-num)
-  "check ascii char is a-z or A-Z"
-  (or (and (> char-num 96) (< char-num 123))
-      (and (> char-num 64) (< char-num 91))))
-
-(defun rabbit-jump--read-char (prompt-str)
-  (read-char
-   (concat (propertize (format "rabbit jump %s" prompt-str)
-                       'face '(minibuffer-prompt default)))))
-
-(defun rabbit-jump (ch start-position end-position)
-  "jump to line, in first CHAR between two position"
-  (let ((start start-position)
-        (end end-position)
-        (table (make-vector
-                (* 2 (count-screen-lines (window-start) (window-end))) 0))
-        (idx 0)
-        (cur 0)
-        (lend 1))
-    (if (> start end)
-        (setq start end-position end start-position rev 1)
-      (setq rev nil))
-    (setq end (1- end))
-    (while (and (< start end) (char-after start))
-      (progn
-        (setq cur (char-after start))
-        ;; a char in alphabet, not in current line had over line end
-        (if (and (alphabet-p cur) (not (= start (point))) (= lend 1))
-            (progn
-              (aset table idx cur)
-              (aset table (1+ idx) start)
-              (setq lend 0)
-              (setq idx (+ 2 idx))))
-        ;; over line end
-        (if (= cur 10) (setq lend 1))
-        (setq start (1+ start))))
-    (dotimes (v (/ (length table) 2))
-      ;; c - current char code, i - the char's position
-      (let ((c 0) (i 0))
-        (if (eq rev 1)
-            (setq c (aref table (* 2 v))
-                  i (1+ (* 2 v)))
-          (setq c (aref table (- (length table) (* 2 v) 2))
-                i (1+ (- (length table) (* 2 v) 2))))
-        (if (eq c ch)
-            (goto-char (aref table i)))))))
 
 (provide 'i-lib)
 

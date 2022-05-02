@@ -32,6 +32,13 @@
 (defvar lvf-cache nil "Cache for lvf first build source list")
 (defvar lvf-history nil "history input of lvf")
 
+(defvar lvf-build-source nil "lvf function to build source")
+(defvar lvf-run-fn nil "lvf function run when run when user do input")
+(defvar lvf-act-fn nil "lvf function run when user confirm input")
+
+(defvar lvf-buffer nil "lvf buffer object")
+(defvar lvf-prev-buffer nil "lvf previous buffer object")
+
 (defmacro with-lvf-buffer-window (&rest body)
   "Ensure to manipulating in lvf-buffer window"
   `(with-selected-window (get-buffer-window lvf-buffer) ,@body))
@@ -79,7 +86,7 @@
                   (lambda ()
                     (interactive)
                     (lvf-buf-act-fn)
-                    (next-line)))
+                    (forward-line)))
    (local-set-key (kbd "C-m") 'lvf-buf-act-fn)
    (local-set-key (kbd "<return>") 'lvf-buf-act-fn)))
 
@@ -137,7 +144,7 @@
    (read-from-minibuffer ">" nil lvf-minibuffer-map nil 'lvf-history))
   (lvf-end))
 
-(defmacro lvf-define-type (name &rest body)
+(defmacro lvf-define-type (name)
   `(defun ,(intern (format "lvf-%s" name)) ()
      ,(format "Use lvf query result, type (%s)." name)
      (interactive)
@@ -147,7 +154,8 @@
      (lvf-run)))
 
 (defmacro lvf-define-common-run-fn (str-list)
-  "Define common lvf run function. Note the STR-LIST should alwauys be a string list"
+  "Define common lvf run function. Note the STR-LIST should alwauys be a string
+list"
   `(let ((input (minibuffer-contents-no-properties)))
      (if (not (string= lvf-last-input input))
          (progn

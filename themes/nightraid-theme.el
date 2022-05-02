@@ -114,4 +114,8 @@ use TERM color as fallback"
 
 (provide-theme 'nightraid)
 
+;; Local Variables:
+;; no-byte-compile: t
+;; End:
+
 ;;; nightraid-theme.el ends here

@@ -83,7 +83,7 @@
       company-minimum-prefix-length 2
       company-selection-wrap-around t
       company-tooltip-maximum-width 60
-      company-show-numbers t)
+      company-show-quick-access t)
 ;; ========================================
 ;;                undo-tree
 ;; ========================================

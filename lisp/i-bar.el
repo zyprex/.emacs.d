@@ -304,10 +304,10 @@ mouse-3: Toggle minor modes"
       eol-mnemonic-unix " unix"
       eol-mnemonic-undecided " _")
 ;; put all symbol in i-bar-format to risky local variable
-(mapcar #'(lambda (x)
-            (if (eq (type-of x) 'symbol)
-                (put x 'risky-local-variable t)))
-        (cdr i-bar-format))
+(mapc #'(lambda (x)
+          (if (eq (type-of x) 'symbol)
+              (put x 'risky-local-variable t)))
+      (cdr i-bar-format))
 (setq-default mode-line-format i-bar-format)
 
 (provide 'i-bar)

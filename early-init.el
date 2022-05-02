@@ -25,6 +25,7 @@
 ;; bellow line only kill message "For information about GNU Emacs..."
 ;; (advice-add #'display-startup-echo-area-message :override #'ignore)
 ;; quickly quit without verbose message
-(advice-add #'kill-emacs :before #'(lambda () (setq inhibit-message t)))
+;; (advice-add #'kill-emacs :before #'(lambda () (setq inhibit-message t)))
 
+(setq emacs-prepare-time (float-time)) ;; start to measure initial time
 ;;; early-init.el ends here

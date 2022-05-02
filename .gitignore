@@ -11,3 +11,7 @@
 !snippets
 !snippets/**/*
 !.gitignore
+**/#*#
+**/.#*
+**/*.elc
+

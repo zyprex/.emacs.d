@@ -72,21 +72,6 @@
   (global-so-long-mode)
   (put 'narrow-to-region 'disabled nil)
   (put 'narrow-to-page 'disabled nil)
-  (with-eval-after-load 'calendar
-    (setq
-     calendar-chinese-celestial-stem
-     ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"]
-     calendar-chinese-terrestrial-branch
-     ["子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥"]
-     calendar-chinese-all-holidays-flag t
-     calendar-latitude +120.214928
-     calendar-longitude +30.252465
-     ;; calendar-location-name ""
-     calendar-mark-holidays-flag t
-     calendar-mark-diary-entries-flag t
-     calendar-view-holidays-initially-flag t)
-    ;; p C
-    (add-hook 'calendar-today-visible-hook 'calendar-mark-today))
   (message "Done: init-settings-delay"))
 
 (defun init-settings-defaults ()
@@ -139,6 +124,7 @@
   ;; (bookmark-bmenu-list) (switch-to-buffer "*Bookmark List*")
   ;; (ignore-errors)
   (setq backup-directory-alist '(("" . "~/.cache/emacs/backup"))
+        history-delete-duplicates t
         delete-old-versions t)
   (setq browse-url-browser-function 'eww-browse-url
         eww-search-prefix "https://www.bing.com/search?q="
@@ -269,7 +255,10 @@
      ("M-; M-n" rabbit-jump-bot)
      ("M-; M-p" rabbit-jump-top)
      ([f2] nil) ;; redefined
-     ;; ([f5] nil)
+     ([f5] (lambda ()
+             (interactive)
+             (if recentf-list
+                 (find-file (car recentf-list)))))
      ;; ([f6] nil)
      ;; ([f7] compile)
      ;; ([f8] recompile)
@@ -469,10 +458,18 @@
   (define-key markdown-mode-map (kbd "M-p") nil))
 (add-hook 'markdown-mode-hook 'markdown-mode-setup)
 
+;; do byte compile for .emacs.d
 (defun start-byte-compile ()
   (interactive)
   (byte-recompile-directory "~/.emacs.d/lisp/" 0)
   (byte-compile-file "~/.emacs.d/init.el"))
+
+(defun clear-byte-compile ()
+  (interactive)
+  (dolist (f (append (file-expand-wildcards "~/.emacs.d/lisp/*.elc")
+                     (file-expand-wildcards "~/.emacs.d/lisp/*/*.elc")))
+    (delete-file f))
+  (delete-file "~/.emacs.d/init.elc"))
 
 
 ;; use menu

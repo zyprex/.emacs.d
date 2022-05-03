@@ -198,6 +198,20 @@
 ;;         (if (eq c ch)
 ;;             (goto-char (aref table i)))))))
 
+;; (with-eval-after-load 'calendar
+;;   (setq
+;;    calendar-chinese-celestial-stem
+;;    ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"]
+;;    calendar-chinese-terrestrial-branch
+;;    ["子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥"]
+;;    calendar-chinese-all-holidays-flag t
+;;    ;; calendar-location-name ""
+;;    calendar-mark-holidays-flag t
+;;    calendar-mark-diary-entries-flag t
+;;    calendar-view-holidays-initially-flag t)
+;;   ;; p C
+;;   (add-hook 'calendar-today-visible-hook 'calendar-mark-today))
+
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:

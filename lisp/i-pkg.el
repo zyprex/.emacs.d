@@ -104,8 +104,8 @@
       evil-ex-search-vim-style-regexp t)
 (evil-set-undo-system 'undo-tree)
 (evil-set-initial-state 'prog-mode 'normal)
-(evil-set-initial-state 'text-mode 'normal)
-(evil-set-initial-state 'evil-command-window-mode 'normal)
+(evil-set-initial-state 'text-mode 'emacs)
+(evil-set-initial-state 'evil-command-window-mode 'insert)
 (setq
  evil-normal-state-tag
  (propertize " N " 'face `(:foreground "Black" :background "chocolate2"))
@@ -142,10 +142,6 @@
 ;; evil's emacs state is not perfect
 (evil-define-key 'emacs 'global (kbd "C-SPC") 'set-mark-command)
 (evil-define-key 'emacs 'global (kbd "C-x SPC") 'rectangle-mark-mode)
-;; (add-hook 'evil-emacs-state-entry-hook
-;;           (lambda () (setq display-line-numbers-type t)))
-;; (add-hook 'evil-emacs-state-exit-hook
-;;           (lambda () (setq display-line-numbers-type '
 ;; ========================================
 ;;                eglot
 ;; ========================================

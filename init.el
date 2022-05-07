@@ -254,11 +254,9 @@
      ("M-p" rabbit-jump-backward)
      ("M-; M-n" rabbit-jump-bot)
      ("M-; M-p" rabbit-jump-top)
+     ("M-'" zoom-to-char)
      ([f2] nil) ;; redefined
-     ([f5] (lambda ()
-             (interactive)
-             (if recentf-list
-                 (find-file (car recentf-list)))))
+     ;; ([f5] nil)
      ;; ([f6] nil)
      ;; ([f7] compile)
      ;; ([f8] recompile)
@@ -282,7 +280,8 @@
         eww-bookmarks-directory      (local-data "")
         url-configuration-directory  (local-data "url/")
         eshell-directory-name        (local-data "eshell/")
-        auto-save-list-file-prefix   (local-data "auto-save-list/.saves-"))
+        auto-save-list-file-prefix   (local-data "auto-save-list/.saves-")
+        project-list-file            (local-data "projects"))
   (setq native-comp-eln-load-path (delete (expand-file-name "eln-cache/" user-emacs-directory)
                                           native-comp-eln-load-path))
 
@@ -330,6 +329,9 @@
   (gui-font-set))
 (add-hook 'window-setup-hook 'window-setup)
 
+;; emacs exit
+;; (defun kill-emacs-setup ())
+;; (add-hook 'kill-emacs-hook 'kill-emacs-setup)
 
 ;;; MAJOR MODE HOOKS
 

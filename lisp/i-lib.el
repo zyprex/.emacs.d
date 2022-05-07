@@ -159,6 +159,24 @@ use `fc-list | fzf` search all fonts"
         (find-file-other-window f)
       (find-file-other-window "~/.emacs.d/memo/m-emacs.org"))))
 
+(defun project-try-local (dir)
+  "Determine if DIR is a non-VC project.
+   DIR must include a .project file to be considered a project."
+  ;; Steal from project-x.el
+  (if-let ((root (locate-dominating-file dir ".project")))
+      (cons 'local root)))
+(add-hook 'project-find-functions 'project-try-local 50)
+
+(cl-defmethod project-root ((project (head local))) (cdr project))
+
+(defun project-fd (dir)
+  (let* ((default-directory dir))
+    (project--remote-file-names
+     (sort (split-string (shell-command-to-string "fd -t f") "\n" t) #'string<))))
+
+(cl-defmethod project-files ((project (head local)) &optional dirs)
+  (mapcan #'project-fd (or dirs (list (project-root project)))))
+
 (defun exex-cmd ()
   "Call `execute-extended-command' the default way."
   (interactive)

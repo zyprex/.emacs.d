@@ -18,7 +18,6 @@
     dim
     eglot
     manage-minor-mode
-    bing-dict
     web-mode
     markdown-mode
     go-mode
@@ -79,7 +78,7 @@
 (global-company-mode)
 ;; (global-company-fuzzy-mode)
 (setq company-fuzzy-prefix-on-top t)
-(setq company-idle-delay 0
+(setq company-idle-delay 0.7
       company-minimum-prefix-length 2
       company-selection-wrap-around t
       company-tooltip-maximum-width 60
@@ -127,7 +126,9 @@
  (propertize " O " 'face `(:foreground "Black" :background "yellow1")))
 ;; (add-hook 'evil-after-load-hook 'force-mode-line-update)
 (evil-set-leader 'normal "s")
-(evil-define-key 'normal 'global (kbd "gc") 'comment-line)
+(evil-define-operator evil-comment (beg end)
+  (comment-or-uncomment-region beg end))
+(evil-define-key 'normal 'global (kbd "gc") 'evil-comment)
 (evil-define-key 'normal 'global (kbd "<leader>w") 'save-buffer)
 (evil-define-key 'normal 'global (kbd "<leader>a") 'evil-buffer)
 ;; evil's normal state is not perfect

@@ -123,4 +123,33 @@ the data means [char-code1 char-code1-position char-code2 char-code2-position
             (rabbit-jump-build-table (window-start) (window-end)) -1)
   (rabbit-jump--transient-map 'rabbit-jump-backward-repeat))
 
+(defmacro zoom-to-char--transient-map ()
+  `(set-transient-map
+    (let ((kmap (make-sparse-keymap)))
+      (define-key kmap (kbd (char-to-string zoom-current-char))
+        (lambda ()
+          (interactive)
+          (zoom-to-char-next zoom-current-char)))
+      kmap)))
+
+;;;###autoload
+(defun zoom-to-char ()
+  (interactive)
+  (make-local-variable 'zoom-current-char)
+  (setq-local zoom-current-char (read-char))
+  (zoom-to-char-next zoom-current-char)
+  (zoom-to-char--transient-map))
+
+(defun zoom-to-char-next (char)
+  (let ((ch char)
+        (cur (1+ (point))))
+    (while (and (not (eq ch (char-after cur)))
+                (< cur (window-end)))
+      (setq cur (1+ cur)))
+    (if (eq ch (char-after cur))
+        (goto-char cur)))
+  (zoom-to-char--transient-map))
+
+
+
 (provide 'i-jmp)

@@ -20,6 +20,8 @@
     (define-key map (kbd "C-p") 'lvf-prev)
     (define-key map (kbd "C-v") 'lvf-pgdn)
     (define-key map (kbd "M-v") 'lvf-pgup)
+    (define-key map (kbd "C-w") 'lvf-insert-word)
+    (define-key map (kbd "C-l") 'lvf-insert-line)
     (define-key map (kbd "M-<") 'lvf-top)
     (define-key map (kbd "M->") 'lvf-bot)
     map)
@@ -41,11 +43,15 @@
 
 (defmacro with-lvf-buffer-window (&rest body)
   "Ensure to manipulating in lvf-buffer window"
-  `(with-selected-window (get-buffer-window lvf-buffer) ,@body))
+  `(let ((w (get-buffer-window lvf-buffer)))
+     (if (window-live-p w)
+         (with-selected-window w ,@body))))
 
 (defmacro with-lvf-prev-buffer-window (&rest body)
   "Ensure to manipulating in lvf-prev-buffer window"
-  `(with-selected-window (get-buffer-window lvf-prev-buffer) ,@body))
+  `(let ((w (get-buffer-window lvf-prev-buffer)))
+     (if (window-live-p w)
+         (with-selected-window w ,@body))))
 
 (defun lvf-next ()
   (interactive)
@@ -54,6 +60,20 @@
 (defun lvf-prev ()
   (interactive)
   (with-lvf-buffer-window (forward-line -1)))
+
+(defun lvf-insert-word ()
+  (interactive)
+  (let ((word ""))
+    (with-lvf-prev-buffer-window
+     (setq word (thing-at-point 'word t)))
+    (insert word)))
+
+(defun lvf-insert-line ()
+  (interactive)
+  (let ((line ""))
+    (with-lvf-prev-buffer-window
+     (setq word (thing-at-point 'line t)))
+     (insert line)))
 
 (defun lvf-pgdn ()
   (interactive)
@@ -271,6 +291,7 @@ list"
 ;;;###autoload
 (lvf-define-type "imenu")
 
+
 ;;;
 ;;; lvf recentf
 ;;;
@@ -303,6 +324,56 @@ list"
 
 ;;;###autoload
 (lvf-define-type "recentf")
+
+
+;;;
+;;; lvf rg
+;;;
+(defun lvf-rg--build-source ()
+  (setq lvf-cache ""))
+
+(defun lvf-rg--run-fn ()
+  (let ((input (minibuffer-contents-no-properties)))
+    (if (not (string= lvf-last-input input))
+        (progn
+          (lvf-display
+           (shell-command-to-string (concat "rg --vimgrep " input)))
+          (setq lvf-last-input input)))))
+
+(defun lvf-rg--act-fn ()
+  (let* ((result-list (split-string lvf-result ":"))
+         (f (nth 0 result-list))
+         (l (1- (string-to-number (nth 1 result-list))))
+         (c (1- (string-to-number (nth 2 result-list)))))
+    (find-file-other-window f)
+    (goto-char (point-min))
+    (forward-line l)
+    (move-to-column c)
+    (recenter)))
+
+;;;###autoload
+(lvf-define-type "rg")
+
+
+;;;
+;;; lvf fd
+;;;
+(defun lvf-fd--build-source ()
+  (setq lvf-cache ""))
+
+(defun lvf-fd--run-fn ()
+  (let ((input (minibuffer-contents-no-properties)))
+    (if (not (string= lvf-last-input input))
+        (progn
+          (lvf-display
+           (shell-command-to-string (concat "fd -t f " input " .")))
+          (setq lvf-last-input input)))))
+
+(defun lvf-fd--act-fn ()
+  (find-file-other-window lvf-result))
+
+;;;###autoload
+(lvf-define-type "fd")
 
 (provide 'i-lvf)
 

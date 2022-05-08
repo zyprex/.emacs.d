@@ -16,6 +16,7 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
     (define-key map (kbd "C-g") 'lvf-interrupt)
+    (define-key map (kbd "<escape>") 'lvf-interrupt)
     (define-key map (kbd "C-n") 'lvf-next)
     (define-key map (kbd "C-p") 'lvf-prev)
     (define-key map (kbd "C-v") 'lvf-pgdn)
@@ -40,6 +41,11 @@
 
 (defvar lvf-buffer nil "lvf buffer object")
 (defvar lvf-prev-buffer nil "lvf previous buffer object")
+(defvar lvf-overlay nil "lvf highlight overlay")
+(defface lvf-highlight-face
+  '((t (:inherit 'match :underline t)))
+  "Face used for highlight select line"
+  :group 'lvf)
 
 (defmacro with-lvf-buffer-window (&rest body)
   "Ensure to manipulating in lvf-buffer window"
@@ -53,20 +59,19 @@
      (if (window-live-p w)
          (with-selected-window w ,@body))))
 
-(defun lvf-next ()
-  (interactive)
-  (with-lvf-buffer-window (forward-line)))
+(defmacro lvf-define-simple-motion (name &rest body)
+  `(defun ,(intern (concat "lvf-" name)) ()
+     (interactive)
+     (with-lvf-buffer-window
+      ,@body
+      (lvf-overlay-put))))
 
-(defun lvf-prev ()
-  (interactive)
-  (with-lvf-buffer-window (forward-line -1)))
-
-(defun lvf-insert-word ()
-  (interactive)
-  (let ((word ""))
-    (with-lvf-prev-buffer-window
-     (setq word (thing-at-point 'word t)))
-    (insert word)))
+(lvf-define-simple-motion "next" (forward-line))
+(lvf-define-simple-motion "prev" (forward-line -1))
+(lvf-define-simple-motion "pgdn" (scroll-up))
+(lvf-define-simple-motion "pgup" (scroll-down))
+(lvf-define-simple-motion "top" (goto-char (point-min)))
+(lvf-define-simple-motion "bot" (goto-char (point-max)))
 
 (defun lvf-insert-line ()
   (interactive)
@@ -74,22 +79,6 @@
     (with-lvf-prev-buffer-window
      (setq word (thing-at-point 'line t)))
      (insert line)))
-
-(defun lvf-pgdn ()
-  (interactive)
-  (with-lvf-buffer-window (scroll-up)))
-
-(defun lvf-pgup ()
-  (interactive)
-  (with-lvf-buffer-window (scroll-down)))
-
-(defun lvf-top()
-  (interactive)
-  (with-lvf-buffer-window (goto-char (point-min))))
-
-(defun lvf-bot()
-  (interactive)
-  (with-lvf-buffer-window (goto-char (point-max))))
 
 (defun lvf-local-buffer-keymap ()
   (with-lvf-buffer-window
@@ -105,8 +94,9 @@
 
 (defun lvf-buf-act-fn()
   (interactive)
-  (setq lvf-result (lvf-get-cursor-line))
-  (lvf-act-fn))
+  (save-selected-window
+    (setq lvf-result (lvf-get-cursor-line))
+    (lvf-act-fn)))
 
 (defun lvf-interrupt ()
   (interactive)
@@ -147,7 +137,17 @@
        (read-only-mode 0))
    (erase-buffer)
    (insert str)
-   (goto-char (point-min))))
+   (goto-char (point-min))
+   (lvf-overlay-put)))
+
+(defun lvf-overlay-put ()
+  (with-lvf-buffer-window
+   (if lvf-overlay
+       (delete-overlay lvf-overlay))
+   (setq lvf-overlay (make-overlay
+                      (+ lvf-prefix-len (line-beginning-position))
+                      (line-end-position)))
+   (overlay-put lvf-overlay 'face 'lvf-highlight-face)))
 
 (defun lvf-run ()
   "Do not use this function directly, it is main entrance of lvf."
@@ -377,6 +377,11 @@ list"
 
 ;;;###autoload
 (lvf-define-type "fd")
+
+
+;;;
+;;; lvf
+;;; (substring-no-properties x)
 
 (provide 'i-lvf)
 

@@ -275,15 +275,19 @@
         savehist-file                (local-data "history")
         save-place-file              (local-data "places")
         bookmark-default-file        (local-data "bookmarks")
-        native-comp-eln-load-path    (append (list (local-data "eln-cache/"))
-                                             native-comp-eln-load-path)
+
         eww-bookmarks-directory      (local-data "")
         url-configuration-directory  (local-data "url/")
         eshell-directory-name        (local-data "eshell/")
         auto-save-list-file-prefix   (local-data "auto-save-list/.saves-")
         project-list-file            (local-data "projects"))
+  (if (boundp 'native-comp-eln-load-path)
+      (progn
+	(setq native-comp-eln-load-path(append (list (local-data "eln-cache/"))
+                                               native-comp-eln-load-path))
   (setq native-comp-eln-load-path (delete (expand-file-name "eln-cache/" user-emacs-directory)
-                                          native-comp-eln-load-path))
+                                          native-comp-eln-load-path))))
+
 
   (defvar local-init-file (locate-user-emacs-file "init-local.el")
     "Local emacs lisp for temporary use")

@@ -91,16 +91,9 @@
   (interactive)
   (with-lvf-buffer-window (goto-char (point-max))))
 
-(defun lvf-interrupt ()
-  (interactive)
-  (cancel-timer lvf-run-timer)
-  (setq lvf-result "")
-  (lvf-local-buffer-keymap)
-  (abort-recursive-edit)
-  (lvf-leave-minibuffer))
-
 (defun lvf-local-buffer-keymap ()
   (with-lvf-buffer-window
+   (cancel-timer lvf-run-timer)
    (read-only-mode 1)
    (local-set-key (kbd "C-j")
                   (lambda ()
@@ -115,12 +108,18 @@
   (setq lvf-result (lvf-get-cursor-line))
   (lvf-act-fn))
 
+(defun lvf-interrupt ()
+  (interactive)
+  (setq lvf-result "")
+  (lvf-local-buffer-keymap)
+  (abort-recursive-edit)
+  (lvf-leave-minibuffer))
+
 (defun lvf-end ()
   "The execute end of lvf"
   (interactive)
-  (cancel-timer lvf-run-timer)
-  (read-only-mode 1)
   (setq lvf-result (lvf-get-cursor-line))
+  (lvf-local-buffer-keymap)
   (lvf-act-fn)
   (lvf-leave-window)
   (lvf-leave-minibuffer)
@@ -144,17 +143,21 @@
 
 (defun lvf-display (str)
   (with-lvf-buffer-window
-   (read-only-mode 0)
+   (if buffer-read-only
+       (read-only-mode 0))
    (erase-buffer)
    (insert str)
    (goto-char (point-min))))
 
 (defun lvf-run ()
   "Do not use this function directly, it is main entrance of lvf."
-  ;; save prev buffer context
-  (setq lvf-prev-buffer (current-buffer))
   (setq lvf-buffer (get-buffer-create lvf-buffer-name))
-  (switch-to-buffer-other-window lvf-buffer t)
+  (catch 'e
+    (if (eq (current-buffer) lvf-buffer)
+        (throw 'e (message "USE LVF IN LVF BUFFER")))
+    (setq lvf-prev-buffer (current-buffer))
+    (if (not (window-live-p (get-buffer-window lvf-buffer)))
+        (switch-to-buffer-other-window lvf-buffer t)))
   (if cursor-in-non-selected-windows
       (setq-local cursor-in-non-selected-windows t))
   (lvf-build-source)
@@ -231,7 +234,7 @@ list"
                   (append out-list
                           (list (format (concat "%" pad "d|%s") line-num line)))))
         (setq line-num (1+ line-num)))
-      (setq lvf-prefix-len (string-match "|" (car out-list)))
+      (setq lvf-prefix-len (1+ (string-match "|" (car out-list))))
       (setq lvf-cache out-list))))
 
 (defun lvf-line--run-fn ()
@@ -309,7 +312,7 @@ list"
      (dolist (f recentf-list)
        (if (not (member (get-file-buffer f) (buffer-list)))
            (setq f-list (append f-list (list (concat "F|" f))))))
-     (setq lvf-prefix-len (string-match "|" (car f-list)))
+     (setq lvf-prefix-len (1+ (string-match "|" (car f-list))))
      (setq lvf-cache f-list))))
 
 (defun lvf-recentf--run-fn ()

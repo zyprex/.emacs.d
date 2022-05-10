@@ -5,6 +5,7 @@
 ;;; Code:
 (require 'imenu)
 (require 'recentf)
+(require 'thingatpt)
 
 ;;;
 ;;;
@@ -15,6 +16,8 @@
 (defvar lvf-minibuffer-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
+    (define-key map (kbd "C-j") 'lvf-end)
+    (define-key map (kbd "C-m") 'lvf-end)
     (define-key map (kbd "C-g") 'lvf-interrupt)
     (define-key map (kbd "<escape>") 'lvf-interrupt)
     (define-key map (kbd "C-n") 'lvf-next)
@@ -60,6 +63,7 @@
          (with-selected-window w ,@body))))
 
 (defmacro lvf-define-simple-motion (name &rest body)
+  "Define simple motion for lvf buffer"
   `(defun ,(intern (concat "lvf-" name)) ()
      (interactive)
      (with-lvf-buffer-window
@@ -73,11 +77,18 @@
 (lvf-define-simple-motion "top" (goto-char (point-min)))
 (lvf-define-simple-motion "bot" (goto-char (point-max)))
 
+(defun lvf-insert-word ()
+  (interactive)
+  (let ((word ""))
+    (with-lvf-prev-buffer-window
+     (setq word (thing-at-point 'word t)))
+     (insert word)))
+
 (defun lvf-insert-line ()
   (interactive)
   (let ((line ""))
     (with-lvf-prev-buffer-window
-     (setq word (thing-at-point 'line t)))
+     (setq line (thing-at-point 'line t)))
      (insert line)))
 
 (defun lvf-local-buffer-keymap ()
@@ -168,6 +179,7 @@
   (lvf-end))
 
 (defmacro lvf-define-type (name)
+  "Define command called `lvf-NAME`"
   `(defun ,(intern (format "lvf-%s" name)) ()
      ,(format "Use lvf query result, type (%s)." name)
      (interactive)
@@ -193,12 +205,15 @@ list"
 ;;; lvf util
 ;;;
 (defun str-list-regex-filter (regex str-list start)
-  (let ((out-list
+  "Filter elements on STR-LIST whose matched REGEX, and match from START. If no
+  matches, return '(\"\")"
+  (let* ((out-list
          (mapcar
           (lambda (x)
             (if (string-match-p regex x start) x nil))
-          str-list)))
-    (delete nil out-list)))
+          str-list))
+        (out-list (delete nil out-list)))
+    (if out-list out-list '(""))))
 
 (defun concat-list-to-string (str-list sp)
   (mapconcat (lambda (x) x) str-list sp))
@@ -255,7 +270,8 @@ list"
 ;;; lvf imenu
 ;;;
 (defun setcar-prefix-str-fmt (s pad v)
-  "Add prefix to a cons's car (the car's type must be the string)"
+  "Add prefix S to a cons's car V (the car's type must be the string),
+PAD is padding space length"
   (cons (format (concat "%" (int-to-string pad) "s %s") s (car v)) (cdr v)))
 
 (defun lvf-imenu--build-source ()
@@ -380,9 +396,88 @@ list"
 
 
 ;;;
-;;; lvf
-;;; (substring-no-properties x)
+;;; lvf loadhist
+;;;
+
+;; command-history
+;; h_L lvf-history
+;; r_K kill-ring
+;; r_S search-ring
+;; M-x extended-command-history <- remove duplicate ?
+;; M-: read-expression-history
+;; M-! shell-command-history
+;; EWW eww-prompt-history
+
+(defun hist-ring-to-plain-line-list (ring-var)
+  "Convert history ring var to plain string list, subst any \n to ' '"
+  (mapcar (lambda (x) (string-replace "\n" " " (substring-no-properties x)))
+          ring-var))
+
+(defun str-list-add-prefix (prefix str-list)
+  "Add PREFIX to each STR-LIST's element"
+  (if str-list
+      (mapcar (lambda (x) (concat prefix x)) str-list)
+    nil))
+
+(defun lvf-loadhist--build-source ()
+  (let* ((lvf-input-hist
+          (str-list-add-prefix "h_L " lvf-history))
+         (kill-ring-hist
+          (str-list-add-prefix
+           "r_K " (hist-ring-to-plain-line-list kill-ring)))
+         (search-ring-hist
+          (str-list-add-prefix
+           "r_S " (hist-ring-to-plain-line-list search-ring)))
+         (extended-command-hist
+          (str-list-add-prefix
+           "M-x "
+           extended-command-history))
+         (read-expression-hist
+          (str-list-add-prefix
+           "M-: "
+           read-expression-history))
+         (shell-command-hist
+          (str-list-add-prefix
+           "M-! "
+           shell-command-history))
+         (out-list (append
+                    shell-command-hist
+                    read-expression-hist
+                    extended-command-hist
+                    search-ring-hist
+                    kill-ring-hist
+                    lvf-input-hist)))
+    (if (fboundp 'eww-prompt-history)
+      (setq out-list
+            (append
+             out-list
+             (eww-prompt-hist
+              (str-list-add-prefix "EWW " eww-prompt-history)))))
+    (setq lvf-prefix-len 4)
+    (setq lvf-cache out-list)))
+
+(defun lvf-loadhist--run-fn ()
+  (lvf-define-common-run-fn lvf-cache))
+
+(defun lvf-loadhist--act-fn ()
+  (let* ((type (substring lvf-result 0 (1- lvf-prefix-len)))
+         (val (substring lvf-result lvf-prefix-len))
+         (val (string-replace " " "\n" val)))
+    (cond
+     ((string= "h_L" type) (kill-new val))
+     ((string= "r_K" type) (kill-new val))
+     ((string= "r_S" type) (kill-new val))
+     ((string= "M-x" type)
+      (if (commandp (intern val))
+          (command-execute (intern val))))
+     ((string= "M-:" type)
+      (eval-expression (read--expression "Eval: " val)))
+     ((string= "M-!" type) (shell-command val))
+     ((string= "EWW" type) (eww val))
+     (t nil))))
+
+;;;###autoload
+(lvf-define-type "loadhist")
 
 (provide 'i-lvf)
-
 ;;; i-lvf.el ends here

@@ -1,8 +1,12 @@
-* prerequisite
-- Emacs 27+
+* Prerequisite
+
+- Emacs 28.1+
+
 * Quick start
-  First run =M-x package-get=.
+
+First run =M-x package-get=.
 
 * About
-  All configure should be self-explained, and start from =init.el=.
-  Technically, browse =init.el= is enough to be understand everything.
+
+All configurations should be self-explained, and start from =init.el=.
+Technically, browse =init.el= is enough to be understand everything.

@@ -13,7 +13,6 @@
     company-web
     company-fuzzy
     company
-    imenu-anywhere
     imenu-list
     dim
     eglot

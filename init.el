@@ -56,9 +56,9 @@
         recentf-max-menu-items 20
         recentf-max-saved-items 99)
   (savehist-mode)
-  (setq savehist-additional-variables
-        '(register-alist)
-        savehist-autosave-interval 60)
+  (setq savehist-autosave-interval 60)
+  ;; (setq savehist-additional-variables '()
+  ;;       savehist-ignored-variables '())
   (save-place-mode)
   (setq save-place-limit 400)
   ;; (show-paren-mode) ;; since emacs28+ no need for this line
@@ -112,7 +112,7 @@
    tab-width 4
    indent-tabs-mode nil
    truncate-lines t ;; fold long line (toggle-truncate-lines)
-   kill-ring-max 99
+   kill-ring-max 100
    history-length 500
    case-fold-search nil
    case-replace nil)
@@ -148,59 +148,31 @@
   (set-buffer-file-coding-system 'utf-8)
   (if (fboundp 'set-w32-system-coding-system)
       (set-w32-system-coding-system 'utf-8))
-  ;; minibuffer completion
+  (global-set-key (kbd "M-/") 'hippie-expand)
+  ;; change minibuffer completion styles
+  ;; Example: rof ->recentf-open-files ,  bbl -> bookmark-bmenu-list
+  (setq-default completion-styles '(initials flex))
   (setq completion-show-help nil
         completion-show-inline-help t
+        completions-detailed t
         tmm-completion-prompt nil)
-  (global-set-key (kbd "M-/") 'hippie-expand)
-  ;; incremental minibuffer completion (or just use fido-mode)
-  ;; recentf-open-files -> rof
-  ;; bookmark-bmenu-list -> bbl
-  (setq-default completion-styles '(initials flex))
-  (icomplete-mode)
-  (define-key minibuffer-local-map (kbd "C-c i") 'icomplete-mode)
-  (define-key-list icomplete-minibuffer-map
-    '(("C-c i" icomplete-mode)
-      ([right] icomplete-forward-completions)
-      ([left]  icomplete-backward-completions)
-      ("C-n"   icomplete-forward-completions)
-      ("C-p"   icomplete-backward-completions)
-      ("C-s"   icomplete-forward-completions)
-      ("C-r"   icomplete-backward-completions)
-      ("C-j"   icomplete-force-complete)
-      ("C-m"   icomplete-force-complete-and-exit)))
-  (setq icomplete-hide-common-prefix nil
-        icomplete-show-matches-on-no-input nil
-        icomplete-tidy-shadowed-file-names t
-        icomplete-compute-delay 0.3
-        icomplete-delay-completions-threshold 20000
-        icomplete-max-delay-chars 1
-        icomplete-prospects-height 1
-        icomplete-in-buffer t
-        icomplete-separator " ")
-  ;; interactively do things with buffers files tags
-  (ido-mode)
-  (define-key-list ido-common-completion-map
-    '(("C-n" ido-next-match) ("C-p" ido-prev-match)))
-  (setq ido-everywhere t
-        ido-enable-flex-matching t
-        ido-enable-regexp t
-        ido-case-fold nil
-        ido-completion-buffer-all-completions t
-        ido-enter-matching-directory t
-        ido-max-dir-file-cache 500
-        ido-max-prospects 20
-        ido-max-window-height 1
-        ido-decorations '("" "" " " " ···" "[" "]"
-                          " [No match]" " [Matched]"
-                          " [Not readable]" " [Too big]" " [Confirm]")
-        ido-use-virtual-buffers t ;; virtual buffer from recentf-list and bookmark
-        ido-auto-merge-delay-time 5)
+  ;; incremental minibuffer completion (icomplete's flex ido mode)
+  (if (version< emacs-version "28.1")
+      (message "Use fido-mode require emacs 28.1+"))
+  (fido-mode 1)
+  (define-key-list icomplete-fido-mode-map
+    '(("C-n" icomplete-forward-completions)
+      ("C-p" icomplete-backward-completions)))
+  (setq icomplete-separator "  "
+        icomplete-prospects-height 1)
+  (define-key minibuffer-local-map (kbd "C-c v") 'fido-vertical-mode)
   ;; imenu
-  (setq imenu-max-items 250
-        imenu-use-popup-menu nil)
+  ;; (setq imenu-use-popup-menu nil)
   (message "Done: init-settings-defaults"))
 
+(defun icomplete-completion-styles-setup ()
+  (setq-local completion-styles '(initials flex)))
+(add-hook 'icomplete-minibuffer-setup-hook 'icomplete-completion-styles-setup)
 
 (defun init-settings-keymaps ()
   (global-set-key-list
@@ -217,18 +189,17 @@
      ("M-; k" prev-buffer-continuous)
      ("M-; o" other-window-next-continuous)
      ("M-; i" other-window-prev-continuous)
-     ("M-; b" ido-switch-buffer)
-     ("M-; M-b" ido-switch-buffer-other-window)
+     ("M-; b" switch-to-buffer)
+     ("M-; M-b" switch-to-buffer-other-window)
      ("M-; <SPC>b" ibuffer)
      ("M-; <SPC>M-b" ibuffer-other-window)
-     ("M-; f" ido-find-file)
-     ("M-; M-f" ido-find-file-other-window)
+     ("M-; f" find-file)
+     ("M-; M-f" find-file-other-window)
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
      ;; need package in ~/.emacs.d/lisp/i-pkg.el
      ("M-; /" lvf-line)
      ("M-; ?" imenu)
-     ("M-; M-?" imenu-anywhere)
      ;; see `windmove-default-keybindings'
      ;; ([left]  windmove-left)
      ;; ([right] windmove-right)

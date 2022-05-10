@@ -4,6 +4,50 @@
 ;;
 ;;; Code:
 
+;;
+;; configure when emacs-version < 28.1
+;;
+  ;; (setq-default completion-styles '(initials flex))
+  ;; (icomplete-mode)
+  ;; (define-key minibuffer-local-map (kbd "C-c i") 'icomplete-mode)
+  ;; (define-key-list icomplete-minibuffer-map
+  ;;   '(("C-c i" icomplete-mode)
+  ;;     ([right] icomplete-forward-completions)
+  ;;     ([left]  icomplete-backward-completions)
+  ;;     ("C-n"   icomplete-forward-completions)
+  ;;     ("C-p"   icomplete-backward-completions)
+  ;;     ("C-s"   icomplete-forward-completions)
+  ;;     ("C-r"   icomplete-backward-completions)
+  ;;     ("C-j"   icomplete-force-complete)
+  ;;     ("C-m"   icomplete-force-complete-and-exit)))
+  ;; (setq icomplete-hide-common-prefix nil
+  ;;       icomplete-show-matches-on-no-input nil
+  ;;       icomplete-tidy-shadowed-file-names t
+  ;;       icomplete-compute-delay 0.3
+  ;;       icomplete-delay-completions-threshold 20000
+  ;;       icomplete-max-delay-chars 1
+  ;;       icomplete-prospects-height 1
+  ;;       icomplete-in-buffer t
+  ;;       icomplete-separator " ")
+  ;; ;; interactively do things with buffers files tags
+  ;; (ido-mode)
+  ;; (define-key-list ido-common-completion-map
+  ;;   '(("C-n" ido-next-match) ("C-p" ido-prev-match)))
+  ;; (setq ido-everywhere t
+  ;;       ido-enable-flex-matching t
+  ;;       ido-enable-regexp t
+  ;;       ido-case-fold nil
+  ;;       ido-completion-buffer-all-completions t
+  ;;       ido-enter-matching-directory t
+  ;;       ido-max-dir-file-cache 500
+  ;;       ido-max-prospects 20
+  ;;       ido-max-window-height 1
+  ;;       ido-decorations '("" "" " " " ···" "[" "]"
+  ;;                         " [No match]" " [Matched]"
+  ;;                         " [Not readable]" " [Too big]" " [Confirm]")
+  ;;       ido-use-virtual-buffers t ;; virtual buffer from recentf-list and bookmark
+  ;;       ido-auto-merge-delay-time 5)
+
 ;; (defun ido-recentf-open ()
 ;;   ;; because of `ido-use-virtual-buffers', this function becomes useless
 ;;   "Use `ido-completing-read' to find a recent file"
@@ -59,7 +103,7 @@
 ;;   "Repeat last `search-n-char-backward'"
 ;;   (interactive)
 ;;   (search-backward search-n-string))
-
+
 ;; https://www.emacswiki.org/emacs/IncrementNumber
 ;; (defun change-number-at-point (change increment)
 ;;   (let ((number (number-at-point))

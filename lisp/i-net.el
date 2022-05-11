@@ -1,23 +1,28 @@
-;;; webcut.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
+;;; i-net.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
 ;;    Function:
 ;;    1. Extract webpage as pure text and show in temp buffer
 ;;    2. Use company and web apis to give english suggestion
 ;;
 ;;; Code:
-;;; TODO: https://www.etymonline.com/api/etymology/fuzzy?key=
 (require 'company)
 (require 'json)
 
 ;;;
 ;;; webcut
 ;;;
+
+;; (defun parse-html-dom-from-string (str)
+;;   (with-temp-buffer
+;;     (inset str)
+;;     (libxml-parse-html-region (point-min) (point-max))))
+
 (defun get-word ()
   (if mark-active
       (buffer-substring-no-properties (region-beginning) (region-end))
-    (thing-at-point 'word)))
+    (thing-at-point 'word t)))
 
-(defun get-html-string-from-url (url &optional frontline backline)
+(defun get-html-string-from-url (url &optional frontline backline subst-pair)
   "return html string, delete FRONTLINE ahead, trim BACKLINE backward"
   (with-temp-buffer
     (url-insert-file-contents url)
@@ -41,21 +46,25 @@
           (goto-char (point-max))
           (re-search-backward backline nil t)
           (delete-region (point) (point-max))))
+    (if (eq (type-of subst-pair) 'cons)
+        (let ((bstr (buffer-string)))
+          (erase-buffer)
+          (insert (subst-each bstr subst-pair))))
     ;; concat html string in one line remove \t space
     (mapconcat (lambda (x)
                  (string-replace  "\t" "" (string-trim x)))
                (split-string (buffer-string) "\n") "")))
 
 (defun html-convert-newline (str)
-  "Convert block element's newline to \n in string"
+  "Convert block element's newline to \\n in string"
   (let ((case-fold-search t))
-  (replace-regexp-in-string
-   (concat "<\\("
-           (mapconcat
-            (lambda (x) x)
-            '("/h[1-6]" "/p" "/li" "/div" "br ?/?") "\\|")
-           "\\)>")
-   "
+    (replace-regexp-in-string
+     (concat "<\\("
+             (mapconcat
+              (lambda (x) x)
+              '("/h[1-6]" "/p" "/li" "/div" "/d[tdl]" "br[ ]*/?") "\\|")
+             "\\)>")
+     "
 " str)))
 ;; (setq case-fold-search (default-value 'case-fold-search)))
 
@@ -66,17 +75,25 @@
   (replace-regexp-in-string "\\(<[^<>]*>\\)+" "" str))
 
 (defun html-convert-entities-to-char (str)
-    (let ((retval str)
+  (let ((retval str)
         (pair-list
-         '(("&nbsp;" . " ")
-           ("&amp;" . "&")
+         '(("&nbsp;" . " ")  ("&amp;" . "&")
+           ("&lt;" . "<")    ("&gt;" . ">")
+           ("&bull;" . "•")  ("&middot;" . "·")
+           ("&quot;" . "\"") ("&apos;" . "'")
+           ("&lsquo;" . "‘") ("&rsquo;" . "’")
+           ("&ldquo;" . "“") ("&rdquo;" . "”")
+           ("&laquo;" . "«") ("&raquo;" . "»")
+           ("&mdash;" . "—") ( "&ndash;" . "–")
            ("&hellip;" . "…")
-           ("&quot;" . "\"")
-           ("&lt;" . "<")
-           ("&gt;" . ">")
            ("&#[0-9]*;" .
             (lambda (match)
               (format "%c" (string-to-number (substring match 2 -1))))))))
+    (subst-each str pair-list)))
+
+(defun subst-each (str pair-list)
+  "Replace each pair's car to cdr in STR"
+  (let ((retval str))
     (dolist (elt pair-list retval)
       (setq retval (replace-regexp-in-string (car elt) (cdr elt) retval)))))
 
@@ -87,65 +104,70 @@
     (insert content)
     (goto-char (point-min))
     (read-only-mode 1)
-    (display-buffer name)
-    (local-set-key (kbd "q") 'delete-window)))
+    (display-buffer name)))
+;; (local-set-key (kbd "q") 'delete-window)))
 
-(defmacro webcut--out (name url &optional arg1 arg2)
+(defmacro webcut--out (name url &optional arg1 arg2 subst-pair)
   `(temp-scratch-buffer
     ,(concat "*webcut-" name "*")
     (html-convert-entities-to-char
      (html-remove-tag
       (html-convert-newline
        (html-remove-inline-js
-        (get-html-string-from-url ,url ,arg1 ,arg2)))))))
+        (get-html-string-from-url ,url ,arg1 ,arg2 ,subst-pair)))))))
 
-(defun webcut-wordnet ()
-  (interactive)
-  (webcut--out
-   "wordnet"
-   (string-replace "%s" (get-word) "http://wordnetweb.princeton.edu/perl/webwn?s=%s&sub=Search+WordNet&o2=&o0=1&o8=1&o1=1&o7=&o5=&o9=&o6=&o3=&o4=&h=")
-   73))
+(defmacro webcut-define--out (name url &optional arg1 arg2 subst-pair)
+  `(defun ,(intern (concat "webcut-" name)) ()
+     (interactive)
+     (webcut--out
+      ,name
+      (string-replace "%s" (get-word) ,url) ,arg1 ,arg2 ,subst-pair)))
+
+(webcut-define--out
+ "word-net"
+ "http://wordnetweb.princeton.edu/perl/webwn?s=%s&sub=Search+WordNet&o2=&o0=1&o8=1&o1=1&o7=&o5=&o9=&o6=&o3=&o4=&h="
+ 73)
 ;; http://wordnetweb.princeton.edu/perl/webwn?s=pear&sub=Search+WordNet&o2=&o0=1&o8=1&o1=1&o7=&o5=&o9=&o6=&o3=&o4=&h=
 
-(defun webcut-ichacha ()
-  (interactive)
-  (webcut--out
-   "ichacha"
-   (string-replace "%s" (get-word) "http://www.ichacha.net/m/%s.html")
-   330 278))
+(webcut-define--out "ichacha" "http://www.ichacha.net/m/%s.html" 332 266)
 ;; http://www.ichacha.net/m/reputable.html
 
-(defun webcut-haici ()
-  (interactive)
-  (webcut--out
-   "haici"
-   (string-replace "%s" (get-word) "https://dict.cn/search?q=%s")
-   "<div class=\"word\">"
-   "<div id=\"dshared\">"))
+(webcut-define--out
+ "haici"
+ "https://dict.cn/search?q=%s"
+ "<div class=\"word\">"
+ "<div id=\"dshared\">")
 ;; https://dict.cn/search?q=honorable
 
-(defun webcut-ahd ()
-  (interactive)
-  (webcut--out
-   "AHD"
-   (string-replace "%s" (get-word) "https://ahdictionary.com/word/search.html?q=%s")
-   "<div class=\"results\">"
-   "<span class=\"copyright\">"))
+(webcut-define--out
+ "ahd"
+ "https://ahdictionary.com/word/search.html?q=%s"
+ "<div class=\"results\">"
+ "<span class=\"copyright\">")
 ;; https://ahdictionary.com/word/search.html?q=latency
+
+
+(webcut-define--out
+ "quword"
+ "https://www.quword.com/w/%s"
+ "<div class=\"col-sm-8\" id=\"yd-content\">"
+ "<div class=\"col-sm-4 hidden-xs yd-sidebars\">"
+ '(("<span class=\"glyphicon glyphicon-star\"></span>" . "★")))
+;; https://www.quword.com/w/perspective
 
 
 ;;;
-;;; webcut + company
+;;; company word suggestion
 ;;;
 (defun company-toggle-backends (arg)
   (interactive
    (list
-    (ido-completing-read "company toggle backend:"
-                         '("word-sug"
-                           "iciba"
-                           "youdao"
-                           "bing-hover"
-                           "etym"))))
+    (completing-read "company toggle backend:"
+                     '("word-sug"
+                       "iciba"
+                       "youdao"
+                       "bing-hover"
+                       "etym"))))
   (setq backend (intern (concat "company-" arg)))
   (make-local-variable 'company-backends)
   (if (member backend company-backends)
@@ -154,6 +176,7 @@
         (message (format "Remove: company-%s" arg)))
     (add-to-list 'company-backends backend)
     (message (format "Added: company-%s" arg))))
+
 
 (defun company-etym-find (word)
   (let ((str
@@ -195,10 +218,11 @@
     (meta (format "%s" arg))))
 
 (defun fetch-json-from-url (url)
-  "return json as plist"
+  "Return json as plist"
   (with-temp-buffer
     (url-insert-file-contents url)
     (json-parse-buffer :object-type 'plist)))
+
 (defun company-iciba-find (word)
   (let* ((pl
           (fetch-json-from-url
@@ -259,4 +283,4 @@
     (candidates (company-word-sug-find arg))
     (meta (bing-hover arg))))
 
-(provide 'webcut)
+(provide 'i-net)

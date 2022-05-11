@@ -29,6 +29,7 @@
      (require 'i-abb) ;; ~/.emacs.d/lisp/i-abb.el
      (require 'i-lvf) ;; ~/.emacs.d/lisp/i-lvf.el
      (require 'i-jmp) ;; ~/.emacs.d/lisp/i-jmp.el
+     (require 'i-net) ;; ~/.emacs.d/lisp/i-net.el
      (setq inhibit-message nil)
      (setq emacs-prepare-time (float-time (time-since emacs-prepare-time)))
      (message (format "Emacs is armed to the teeth in %.6f seconds"
@@ -349,10 +350,19 @@
 
 ;; ibuffer
 (with-eval-after-load 'ibuffer
-  (setq ibuffer-default-sorting-mode 'alphabetic
+  (setq ibuffer-show-empty-filter-groups nil
+        ibuffer-default-sorting-mode 'major-mode
         ibuffer-default-sorting-reversep t)
+  (setq ibuffer-saved-filter-groups
+        '(("Home"
+           ("Emacs-config" (filename . ".emacs.d"))
+           ("Docs" (or (mode . org-mode)
+                       (mode . markdown-mode)))
+           ("Help" (or (name . "\*Help\*")
+                       (name . "\*Apropos\*")
+                       (name . "\*info\*")))
+           ("Temp" (name . "\*.*\*")))))
   ;; use human readable size column instead of original one
-  ;; modify the default ibuffer-formats
   (define-ibuffer-column size-h
     (:name "Size" :inline t)
     (cond
@@ -360,6 +370,7 @@
      ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
      ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
      (t (format "%8d" (buffer-size)))))
+  ;; modify the default ibuffer-formats
   (setq ibuffer-formats
         '((mark modified read-only " "
                 (name 18 18 :left :elide)
@@ -370,7 +381,8 @@
                 " "
                 filename-and-process)
           (mark " " (name 16 -1) " " filename))))
-;; (add-hook 'ibuffer-mode-hook (lambda ()))
+(add-hook 'ibuffer-mode-hook
+          (lambda () (ibuffer-switch-to-saved-filter-groups "Home")))
 
 ;; prog
 (defun prog-mode-setup ()

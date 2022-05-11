@@ -409,7 +409,7 @@ PAD is padding space length"
 ;; EWW eww-prompt-history
 
 (defun hist-ring-to-plain-line-list (ring-var)
-  "Convert history ring var to plain string list, subst any \n to ' '"
+  "Convert history ring var to plain string list, subst any \\n to ' '"
   (mapcar (lambda (x) (string-replace "\n" " " (substring-no-properties x)))
           ring-var))
 

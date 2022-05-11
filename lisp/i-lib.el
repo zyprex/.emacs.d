@@ -132,16 +132,16 @@ use `fc-list | fzf` search all fonts"
       (when (not (require 'pkg nil 'noerror))
         (throw 'e (package-get))))))
 
-(defun ido-find-tag ()
-  "Find a tag using ido"
-  (interactive)
-  (tags-completion-table)
-  (let (tags-names)
-    (mapc (lambda (x)
-	    (unless (integerp x)
-	      (push (prin1-to-string x t) tags-names)))
-	  tags-completion-table)
-    (xref-find-definitions (ido-completing-read "TAGS:" tags-names))))
+;; (defun ido-find-tag ()
+;;   "Find a tag using ido"
+;;   (interactive)
+;;   (tags-completion-table)
+;;   (let (tags-names)
+;;     (mapc (lambda (x)
+;; 	    (unless (integerp x)
+;; 	      (push (prin1-to-string x t) tags-names)))
+;; 	  tags-completion-table)
+;;     (xref-find-definitions (ido-completing-read "TAGS:" tags-names))))
 
 (defmacro ft-init-function (regex fn)
   "Run file type function, when the open file match the REGEX"

@@ -140,16 +140,15 @@
         lazy-count-suffix-format " [%s/%s]")
   ;; enforce UTF-8 as the default encoding for all files
   (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (set-file-name-coding-system 'utf-8)
-  (set-clipboard-coding-system 'utf-8)
-  (set-buffer-file-coding-system 'utf-8)
-  (if (fboundp 'set-w32-system-coding-system)
-      (set-w32-system-coding-system 'utf-8))
-  (global-set-key (kbd "M-/") 'hippie-expand)
+  ;; (set-default-coding-systems 'utf-8)
+  ;; (set-terminal-coding-system 'utf-8)
+  ;; (set-keyboard-coding-system 'utf-8)
+  ;; (set-selection-coding-system 'utf-8)
+  ;; (set-file-name-coding-system 'utf-8)
+  ;; (set-clipboard-coding-system 'utf-8)
+  ;; (set-buffer-file-coding-system 'utf-8)
+  ;; (if (fboundp 'set-w32-system-coding-system)
+  ;;     (set-w32-system-coding-system 'utf-8))
   ;; change minibuffer completion styles
   ;; Example: rof ->recentf-open-files ,  bbl -> bookmark-bmenu-list
   (setq-default completion-styles '(initials flex))
@@ -198,7 +197,6 @@
      ("M-; M-f" find-file-other-window)
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
-     ;; need package in ~/.emacs.d/lisp/i-pkg.el
      ("M-; /" lvf-line)
      ("M-; ?" imenu)
      ;; see `windmove-default-keybindings'
@@ -209,7 +207,8 @@
      ;; adjust defaults
      ("M-; M-:" eval-region)
      ("M-; M-z" zap-up-to-char)
-     ("C-^"   mode-line-other-buffer) ; the vim-way
+     ("C-^" mode-line-other-buffer) ; the vim-way
+     ("M-/" hippie-expand)
      ("<escape>" keyboard-escape-quit) ; same as C-g
      ;; need functions in ~/.emacs.d/lisp/i-lib.el
      ("<C-return>"   open-line-below)

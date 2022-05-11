@@ -22,6 +22,9 @@
       (buffer-substring-no-properties (region-beginning) (region-end))
     (thing-at-point 'word t)))
 
+(defun prepare-query-url (url)
+  (string-replace "%s" (get-word) url))
+
 (defun get-html-string-from-url (url &optional frontline backline subst-pair)
   "return html string, delete FRONTLINE ahead, trim BACKLINE backward"
   (with-temp-buffer
@@ -121,17 +124,20 @@
      (interactive)
      (webcut--out
       ,name
-      (string-replace "%s" (get-word) ,url) ,arg1 ,arg2 ,subst-pair)))
+      (prepare-query-url ,url) ,arg1 ,arg2 ,subst-pair)))
 
+;;;###autoload
 (webcut-define--out
- "word-net"
+ "wordnet"
  "http://wordnetweb.princeton.edu/perl/webwn?s=%s&sub=Search+WordNet&o2=&o0=1&o8=1&o1=1&o7=&o5=&o9=&o6=&o3=&o4=&h="
  73)
 ;; http://wordnetweb.princeton.edu/perl/webwn?s=pear&sub=Search+WordNet&o2=&o0=1&o8=1&o1=1&o7=&o5=&o9=&o6=&o3=&o4=&h=
 
+;;;###autoload
 (webcut-define--out "ichacha" "http://www.ichacha.net/m/%s.html" 332 266)
 ;; http://www.ichacha.net/m/reputable.html
 
+;;;###autoload
 (webcut-define--out
  "haici"
  "https://dict.cn/search?q=%s"
@@ -139,6 +145,7 @@
  "<div id=\"dshared\">")
 ;; https://dict.cn/search?q=honorable
 
+;;;###autoload
 (webcut-define--out
  "ahd"
  "https://ahdictionary.com/word/search.html?q=%s"
@@ -146,7 +153,7 @@
  "<span class=\"copyright\">")
 ;; https://ahdictionary.com/word/search.html?q=latency
 
-
+;;;###autoload
 (webcut-define--out
  "quword"
  "https://www.quword.com/w/%s"
@@ -155,10 +162,44 @@
  '(("<span class=\"glyphicon glyphicon-star\"></span>" . "★")))
 ;; https://www.quword.com/w/perspective
 
+(defmacro plist-get-string (p-list attr)
+  `(let ((ret (plist-get ,p-list ,attr)))
+     (if ret ret "")))
+
+;;;###autoload
+(defun webcut-moedict ()
+  (interactive)
+  (let* ((pl
+          (fetch-json-from-url
+           (prepare-query-url "https://www.moedict.tw/a/%s.json")))
+         (title-str (plist-get pl :t))
+         (def (aref (plist-get pl :h) 0))
+         (pinyin-str (plist-get def :p))
+         (explain-list (mapcar (lambda (x)
+                                 (format "\n<%s> %s\n%s\n"
+                                         (plist-get-string x :type)
+                                         (plist-get-string x :f)
+                                         (plist-get-string x :e)))
+                               (plist-get def :d)))
+         (explain-str (mapconcat (lambda (x) x) explain-list ""))
+         (translation (plist-get pl :translation))
+         (translation-str (format "\n英: %S\n德: %S\n法: %S\n"
+                                  (plist-get-string translation :English)
+                                  (plist-get-string translation :Deutsch)
+                                  (plist-get-string translation :francais)))
+         (str-out (concat title-str "(" pinyin-str ")" explain-str
+                          translation-str)))
+    (temp-scratch-buffer
+     "*webcut-moedict*"
+     (subst-each str-out '(("~`" . "") ("`" . "") ("~" . ""))))))
+;; https://www.moedict.tw/a/%E8%90%8C.json
+
 
 ;;;
 ;;; company word suggestion
 ;;;
+
+;;;###autoload
 (defun company-toggle-backends (arg)
   (interactive
    (list

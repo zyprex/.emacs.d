@@ -31,19 +31,27 @@
     map)
   "Keymap used by `lvf' in the minibuffer")
 
+;; Status var of lvf
 (defvar lvf-last-input nil "Latest input in lvf minibuffer")
 (defvar lvf-run-timer nil "Monitor the user input")
 (defvar lvf-result "" "Result line returned")
-(defvar lvf-prefix-len 0 "Prefix length in result")
-(defvar lvf-cache nil "Cache for lvf first build source list")
 (defvar lvf-history nil "history input of lvf")
 
+;; Those var may have to be set after each build source
+(defvar lvf-leave-early nil "If t close lvf-buffer before exit minibuffer")
+(defvar lvf-prefix-len 0 "Prefix length in result")
+(defvar lvf-cache nil "Cache for lvf first build source list")
+
+;; Those var will have different value when lvf run different type
 (defvar lvf-build-source nil "lvf function to build source")
 (defvar lvf-run-fn nil "lvf function run when run when user do input")
 (defvar lvf-act-fn nil "lvf function run when user confirm input")
 
+;; Buffer context var of lvf
 (defvar lvf-buffer nil "lvf buffer object")
 (defvar lvf-prev-buffer nil "lvf previous buffer object")
+
+;; Render lvf-buffer
 (defvar lvf-overlay nil "lvf highlight overlay")
 (defface lvf-highlight-face
   '((t (:inherit 'match :underline t)))
@@ -121,9 +129,14 @@
   (interactive)
   (setq lvf-result (lvf-get-cursor-line))
   (lvf-local-buffer-keymap)
-  (lvf-act-fn)
-  (lvf-leave-window)
-  (lvf-leave-minibuffer)
+  (if lvf-leave-early
+      (progn
+        (lvf-leave-window)
+        (lvf-leave-minibuffer)
+        (lvf-act-fn))
+    (lvf-act-fn)
+    (lvf-leave-window)
+    (lvf-leave-minibuffer))
   (setq lvf-result "")
   (setq lvf-prefix-len 0)
   (setq lvf-cache nil))
@@ -249,6 +262,7 @@ list"
                   (append out-list
                           (list (format (concat "%" pad "d|%s") line-num line)))))
         (setq line-num (1+ line-num)))
+      (setq lvf-leave-early nil)
       (setq lvf-prefix-len (1+ (string-match "|" (car out-list))))
       (setq lvf-cache out-list))))
 
@@ -300,6 +314,7 @@ PAD is padding space length"
                            (list (setcar-prefix-str-fmt (car v) min-pad i)))))))
      ;; (message "%s" out-alist)
      ;; (dolist (v out-alist) (message "%s" (car v)))
+      (setq lvf-leave-early nil)
      (setq lvf-prefix-len (string-match "[^ ] " (car (car out-alist))))
      (setq lvf-cache out-alist))))
 
@@ -338,6 +353,7 @@ PAD is padding space length"
      (dolist (f recentf-list)
        (if (not (member (get-file-buffer f) (buffer-list)))
            (setq f-list (append f-list (list (concat "F|" f))))))
+     (setq lvf-leave-early nil)
      (setq lvf-prefix-len (1+ (string-match "|" (car f-list))))
      (setq lvf-cache f-list))))
 
@@ -359,6 +375,7 @@ PAD is padding space length"
 ;;; lvf rg
 ;;;
 (defun lvf-rg--build-source ()
+  (setq lvf-leave-early nil)
   (setq lvf-cache ""))
 
 (defun lvf-rg--run-fn ()
@@ -388,6 +405,7 @@ PAD is padding space length"
 ;;; lvf fd
 ;;;
 (defun lvf-fd--build-source ()
+  (setq lvf-leave-early nil)
   (setq lvf-cache ""))
 
 (defun lvf-fd--run-fn ()
@@ -450,19 +468,18 @@ PAD is padding space length"
           (str-list-add-prefix
            "M-! "
            shell-command-history))
+         (eww-prompt-hist (if (boundp 'eww-prompt-history)
+                              (str-list-add-prefix "EWW " eww-prompt-history)
+                          '()))
          (out-list (append
                     shell-command-hist
                     read-expression-hist
                     extended-command-hist
+                    eww-prompt-hist
                     search-ring-hist
                     kill-ring-hist
                     lvf-input-hist)))
-    (if (fboundp 'eww-prompt-history)
-      (setq out-list
-            (append
-             out-list
-             (eww-prompt-hist
-              (str-list-add-prefix "EWW " eww-prompt-history)))))
+    (setq lvf-leave-early t)
     (setq lvf-prefix-len 4)
     (setq lvf-cache out-list)))
 
@@ -478,8 +495,9 @@ PAD is padding space length"
      ((string= "r_K" type) (kill-new val))
      ((string= "r_S" type) (kill-new val))
      ((string= "M-x" type)
-      (if (commandp (intern val))
-          (command-execute (intern val))))
+      (let ((cmd (intern val)))
+        (if (commandp cmd)
+             (command-execute cmd))))
      ((string= "M-:" type)
       (eval-expression (read--expression "Eval: " val)))
      ((string= "M-!" type) (shell-command val))

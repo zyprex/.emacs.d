@@ -117,9 +117,9 @@
    history-length 500
    case-fold-search nil
    case-replace nil)
-  ;; (setq enable-recursive-minibuffers t)
   ;; use C-M-c exit-recursive-edit, use C-] abort-recurse-edit
   ;; also have a look at `completing-read-multiple'
+  (setq enable-recursive-minibuffers t)
   ;; (fset 'yes-or-no-p 'y-or-n-p)
   (defalias 'list-buffers 'ibuffer)
   ;; (bookmark-bmenu-list) (switch-to-buffer "*Bookmark List*")
@@ -197,7 +197,12 @@
      ("M-; M-f" find-file-other-window)
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
-     ("M-; /" lvf-line)
+     ("M-; /l" lvf-line)
+     ("M-; /i" lvf-imenu)
+     ("M-; /r" lvf-recentf)
+     ("M-; /g" lvf-rg)
+     ("M-; /f" lvf-fd)
+     ("M-; /h" lvf-loadhist)
      ("M-; ?" imenu)
      ;; see `windmove-default-keybindings'
      ;; ([left]  windmove-left)
@@ -246,7 +251,6 @@
         savehist-file                (local-data "history")
         save-place-file              (local-data "places")
         bookmark-default-file        (local-data "bookmarks")
-
         eww-bookmarks-directory      (local-data "")
         url-configuration-directory  (local-data "url/")
         eshell-directory-name        (local-data "eshell/")

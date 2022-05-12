@@ -279,14 +279,20 @@ PAD is padding space length"
    (let ((min-pad 1)
          (out-alist '())
          (imenu-alist (imenu--make-index-alist)))
+     ;; find min padding length
      (dolist (v imenu-alist)
-       (if (not (markerp (cdr v)))
+       (if (listp (cdr v))
            (setq min-pad (max (length (car v)) min-pad))))
+     ;; append items with added prefix
      (dolist (v imenu-alist)
-       (if (markerp (cdr v))
+       ;; -- function
+       (if (or (markerp (cdr v))
+               (and (numberp (cdr v))
+                    (not (= (cdr v) -99)))) ;; remove *Rescan*
            (setq out-alist
                  (append out-alist
                          (list (setcar-prefix-str-fmt "*" min-pad v)))))
+        ;; -- other type
        (if (listp (cdr v))
            (dolist (i (cdr v))
              (setq out-alist
@@ -303,8 +309,11 @@ PAD is padding space length"
 (defun lvf-imenu--act-fn ()
   (with-lvf-prev-buffer-window
    (let ((m (cdr (assoc lvf-result lvf-cache))))
-     (switch-to-buffer (marker-buffer m))
-     (goto-char (marker-position m))
+     (cond
+      ((markerp m)
+       (switch-to-buffer (marker-buffer m))
+       (goto-char (marker-position m)))
+      ((numberp m) (goto-char m)))
      (recenter))))
 
 ;;;###autoload
@@ -318,7 +327,8 @@ PAD is padding space length"
   (with-lvf-prev-buffer-window
    (let ((f-list '())
          (f-list-temp '()))
-     (dolist (b (cdr (buffer-list))) ;; first buffer is always lvf-prev-buffer
+     ;; first buffer is always lvf-prev-buffer, remove it
+     (dolist (b (cdr (buffer-list)))
        (if (buffer-file-name b)
            (setq f-list (append f-list (list (concat "B|" (buffer-name b)))))
          (if (not (string-match-p "^ \\*" (buffer-name b)))

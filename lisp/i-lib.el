@@ -108,11 +108,13 @@ use `fc-list | fzf` search all fonts"
      'fixed-pitch
      (guess-font '("Fixedsys" "Consolas" "Inconsolata")))
     (set-fontset-font
-     t 'symbol (guess-font '("Segoe UI Symbol" "Symbola")))
+     t 'unicode (guess-font '("Symbola" "Segoe UI Symbol")))
+    (set-fontset-font
+     t 'symbol (guess-font '("Symbola" "Segoe UI Symbol")))
     (set-fontset-font
      t 'han
-     (guess-font '("微软雅黑" "等距更纱黑体 SC" "Microsoft JhengHei" "黑体"
-                   "楷体" "Noto Sans CJK")))
+     (guess-font '("楷体" "Microsoft JhengHei" "微软雅黑" "SC 等距更纱黑体"
+                   "黑体" "Noto Sans CJK")))
     (set-fontset-font
      t '(#x1f300 . #x1fad0)
      (guess-font '("Noto Color Emoji" "Noto Emoji" "Segoe UI Emoji"

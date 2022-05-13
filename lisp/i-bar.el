@@ -1,4 +1,3 @@
-
 ;;; i-bar.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
 ;;   private customized statusbar (Emacs mode line)
@@ -12,14 +11,8 @@
           (kill-new f)
           (message "Copied: '%s'" f)))))
 
-(defun relative-directory (dir) dir)
-;; FIX_ME:
-;; (defun relative-directory (dir)
-;;   (let ((p (file-relative-name dir "~")))
-;;     (cond
-;;      ((string-equal p dir) dir)
-;;      ((string-equal p "./") "~/")
-;;      (t (concat "~/" p)))))
+(defun relative-directory (dir)
+  (abbreviate-file-name dir))
 
 (defun file-directory ()
   "Check whether the default directory is not in current file's

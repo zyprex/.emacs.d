@@ -361,6 +361,7 @@
            ("Emacs-config" (filename . ".emacs.d"))
            ("Docs" (or (mode . org-mode)
                        (mode . markdown-mode)))
+           ("Dired" (mode . dired-mode))
            ("Help" (or (name . "\*Help\*")
                        (name . "\*Apropos\*")
                        (name . "\*info\*")))

@@ -243,6 +243,13 @@ list"
   (with-current-buffer buf
     (< (* 1024 1024 2) (- (point-max) (point-min)))))
 
+(defmacro str-list--add-prefix (prefix str-list)
+  "Add PREFIX to each STR-LIST's element"
+  `(if ,str-list
+       (setq ,str-list
+             (mapcar (lambda (x) (concat ,prefix x)) ,str-list))))
+
+
 
 ;;;
 ;;; lvf line
@@ -338,24 +345,48 @@ PAD is padding space length"
 ;;;
 ;;; lvf recentf
 ;;;
+
 (defun lvf-recentf--build-source ()
   (with-lvf-prev-buffer-window
-   (let ((f-list '())
-         (f-list-temp '()))
-     ;; first buffer is always lvf-prev-buffer, remove it
+   (let ((pbuf  (list (buffer-name (car (buffer-list)))))
+         (buf-list '())
+         (tbuf-list '())
+         (f-list '())
+         (d-list '()))
      (dolist (b (cdr (buffer-list)))
        (if (buffer-file-name b)
-           (setq f-list (append f-list (list (concat "B|" (buffer-name b)))))
-         (if (not (string-match-p "^ \\*" (buffer-name b)))
-             (setq f-list-temp
-                   (append f-list-temp (list (concat "B|" (buffer-name b))))))))
-     (setq f-list (append f-list (delete (concat "B|" lvf-buffer-name) f-list-temp)))
+           (setq buf-list
+                 (append buf-list (list (buffer-name b))))
+         (if (not (string-match-p " \\*" (buffer-name b)))
+             (setq tbuf-list
+                   (append tbuf-list (list (buffer-name b)))))))
      (dolist (f recentf-list)
        (if (not (member (get-file-buffer f) (buffer-list)))
-           (setq f-list (append f-list (list (concat "F|" f))))))
+           (setq f-list
+                 (append f-list (list (abbreviate-file-name f)))))
+       (if (not (member (file-name-directory f) d-list))
+           (setq d-list
+                 (append d-list (list (abbreviate-file-name
+                                       (file-name-directory f)))))))
+     (dolist (f file-name-history)
+       (if (and (file-exists-p f)
+                (not (member (get-file-buffer f) (buffer-list)))
+                (not (member f f-list)))
+           (setq f-list
+                 (append f-list (list f))))
+       (if (and (file-exists-p (file-name-directory f))
+                (not (member (file-name-directory f) d-list)))
+           (setq d-list
+                 (append d-list (list (file-name-directory f))))))
+     (setq tbuf-list (delete lvf-buffer-name tbuf-list))
+     (str-list-add-prefix "B|" buf-list)
+     (str-list-add-prefix "B|" pbuf)
+     (str-list-add-prefix "B|" tbuf-list)
+     (str-list-add-prefix "F|" f-list)
+     (str-list-add-prefix "D|" d-list)
+     (setq lvf-cache (append buf-list pbuf tbuf-list f-list d-list))
      (setq lvf-leave-early nil)
-     (setq lvf-prefix-len (1+ (string-match "|" (car f-list))))
-     (setq lvf-cache f-list))))
+     (setq lvf-prefix-len 2))))
 
 (defun lvf-recentf--run-fn ()
   (lvf-define-common-run-fn lvf-cache))
@@ -365,7 +396,9 @@ PAD is padding space length"
          (name (substring lvf-result 2)))
     (cond
      ((string= type "B") (pop-to-buffer name))
-     ((string= type "F") (find-file-other-window name)))))
+     ((string= type "F") (find-file-other-window name))
+     ((string= type "D")
+      (with-lvf-prev-buffer-window (cd name))))))
 
 ;;;###autoload
 (lvf-define-type "recentf")
@@ -436,52 +469,36 @@ PAD is padding space length"
 ;; M-! shell-command-history
 ;; EWW eww-prompt-history
 
-(defun hist-ring-to-plain-line-list (ring-var)
-  "Convert history ring var to plain string list, subst any \\n to ' '"
+(defun str-to-line-list (list-var)
+  "Convert string list to one line string list, substitute any \\n to ' '"
   (mapcar (lambda (x) (string-replace "\n" " " (substring-no-properties x)))
-          ring-var))
-
-(defun str-list-add-prefix (prefix str-list)
-  "Add PREFIX to each STR-LIST's element"
-  (if str-list
-      (mapcar (lambda (x) (concat prefix x)) str-list)
-    nil))
+          list-var))
 
 (defun lvf-loadhist--build-source ()
-  (let* ((lvf-input-hist
-          (str-list-add-prefix "h_L " lvf-history))
-         (kill-ring-hist
-          (str-list-add-prefix
-           "r_K " (hist-ring-to-plain-line-list kill-ring)))
-         (search-ring-hist
-          (str-list-add-prefix
-           "r_S " (hist-ring-to-plain-line-list search-ring)))
-         (extended-command-hist
-          (str-list-add-prefix
-           "M-x "
-           extended-command-history))
-         (read-expression-hist
-          (str-list-add-prefix
-           "M-: "
-           read-expression-history))
-         (shell-command-hist
-          (str-list-add-prefix
-           "M-! "
-           shell-command-history))
-         (eww-prompt-hist (if (boundp 'eww-prompt-history)
-                              (str-list-add-prefix "EWW " eww-prompt-history)
-                          '()))
-         (out-list (append
-                    shell-command-hist
-                    read-expression-hist
-                    extended-command-hist
-                    eww-prompt-hist
-                    search-ring-hist
-                    kill-ring-hist
-                    lvf-input-hist)))
+  (let* ((lvf-input-hist lvf-history)
+         (kill-ring-hist (str-to-line-list kill-ring))
+         (search-ring-hist (str-to-line-list search-ring))
+         (extended-command-hist extended-command-history)
+         (read-expression-hist read-expression-history)
+         (shell-command-hist shell-command-history)
+         (eww-prompt-hist eww-prompt-history))
+    (str-list--add-prefix "h_L " lvf-input-hist)
+    (str-list--add-prefix "r_K " kill-ring-hist)
+    (str-list--add-prefix "r_S " search-ring-hist)
+    (str-list--add-prefix "EWW " eww-prompt-hist)
+    (str-list--add-prefix "M-x " extended-command-hist)
+    (str-list--add-prefix "M-: " read-expression-hist)
+    (str-list--add-prefix "M-! " shell-command-hist)
+    (setq lvf-cache (append
+                     shell-command-hist
+                     read-expression-hist
+                     extended-command-hist
+                     eww-prompt-hist
+                     search-ring-hist
+                     kill-ring-hist
+                     lvf-input-hist))
     (setq lvf-leave-early t)
-    (setq lvf-prefix-len 4)
-    (setq lvf-cache out-list)))
+    (setq lvf-prefix-len 4)))
 
 (defun lvf-loadhist--run-fn ()
   (lvf-define-common-run-fn lvf-cache))

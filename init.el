@@ -197,6 +197,7 @@
      ("M-; M-f" find-file-other-window)
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
+     ("M-; //" lvf-run)
      ("M-; /l" lvf-line)
      ("M-; /i" lvf-imenu)
      ("M-; /r" lvf-recentf)

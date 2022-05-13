@@ -173,23 +173,28 @@
                       (line-end-position)))
    (overlay-put lvf-overlay 'face 'lvf-highlight-face)))
 
+;;;###autoload
 (defun lvf-run ()
-  "Do not use this function directly, it is main entrance of lvf."
-  (setq lvf-buffer (get-buffer-create lvf-buffer-name))
-  (catch 'e
-    (if (eq (current-buffer) lvf-buffer)
-        (throw 'e (message "USE LVF IN LVF BUFFER")))
-    (setq lvf-prev-buffer (current-buffer))
-    (if (not (window-live-p (get-buffer-window lvf-buffer)))
-        (switch-to-buffer-other-window lvf-buffer t)))
-  (if cursor-in-non-selected-windows
-      (setq-local cursor-in-non-selected-windows t))
-  (lvf-build-source)
-  (setq lvf-run-timer (run-with-idle-timer 1 30 'lvf-run-fn))
-  (add-to-history
-   'lvf-history
-   (read-from-minibuffer ">" nil lvf-minibuffer-map nil 'lvf-history))
-  (lvf-end))
+  "If call this command directly, run lvf with last type."
+  (interactive)
+  (when (and (functionp 'lvf-build-source)
+             (functionp 'lvf-run-fn)
+             (functionp 'lvf-act-fn))
+    (setq lvf-buffer (get-buffer-create lvf-buffer-name))
+    (catch 'e
+      (if (eq (current-buffer) lvf-buffer)
+          (throw 'e (message "USE LVF IN LVF BUFFER")))
+      (setq lvf-prev-buffer (current-buffer))
+      (if (not (window-live-p (get-buffer-window lvf-buffer)))
+          (switch-to-buffer-other-window lvf-buffer t)))
+    ;; (if cursor-in-non-selected-windows
+    ;;     (setq-local cursor-in-non-selected-windows t))
+    (lvf-build-source)
+    (setq lvf-run-timer (run-with-idle-timer 1 30 'lvf-run-fn))
+    (add-to-history
+     'lvf-history
+     (read-from-minibuffer ">" nil lvf-minibuffer-map nil 'lvf-history))
+    (lvf-end)))
 
 (defmacro lvf-define-type (name)
   "Define command called `lvf-NAME`"
@@ -221,11 +226,11 @@ list"
   "Filter elements on STR-LIST whose matched REGEX, and match from START. If no
   matches, return '(\"\")"
   (let* ((out-list
-         (mapcar
-          (lambda (x)
-            (if (string-match-p regex x start) x nil))
-          str-list))
-        (out-list (delete nil out-list)))
+          (mapcar
+           (lambda (x)
+             (if (string-match-p regex x start) x nil))
+           str-list))
+         (out-list (delete nil out-list)))
     (if out-list out-list '(""))))
 
 (defun concat-list-to-string (str-list sp)
@@ -313,7 +318,7 @@ PAD is padding space length"
            (setq out-alist
                  (append out-alist
                          (list (setcar-prefix-str-fmt "*" min-pad v)))))
-        ;; -- other type
+       ;; -- other type
        (if (listp (cdr v))
            (dolist (i (cdr v))
              (setq out-alist
@@ -321,7 +326,7 @@ PAD is padding space length"
                            (list (setcar-prefix-str-fmt (car v) min-pad i)))))))
      ;; (message "%s" out-alist)
      ;; (dolist (v out-alist) (message "%s" (car v)))
-      (setq lvf-leave-early nil)
+     (setq lvf-leave-early nil)
      (setq lvf-prefix-len (string-match "[^ ] " (car (car out-alist))))
      (setq lvf-cache out-alist))))
 
@@ -409,6 +414,7 @@ PAD is padding space length"
 ;;;
 (defun lvf-rg--build-source ()
   (setq lvf-leave-early nil)
+  (setq lvf-prefix-len 0)
   (setq lvf-cache ""))
 
 (defun lvf-rg--run-fn ()
@@ -439,6 +445,7 @@ PAD is padding space length"
 ;;;
 (defun lvf-fd--build-source ()
   (setq lvf-leave-early nil)
+  (setq lvf-prefix-len 0)
   (setq lvf-cache ""))
 
 (defun lvf-fd--run-fn ()

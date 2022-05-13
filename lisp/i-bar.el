@@ -11,9 +11,6 @@
           (kill-new f)
           (message "Copied: '%s'" f)))))
 
-(defun relative-directory (dir)
-  (abbreviate-file-name dir))
-
 (defun file-directory ()
   "Check whether the default directory is not in current file's
 directory, if not, return file's directory"
@@ -40,12 +37,13 @@ directory, if not, return file's directory"
       (concat (substring str 0 len) "…")
   str))
 
-(defun shorten-string-suffix (str len)
-  (if (> (string-width str) len)
-      (concat
-       "…"
-       (substring str (- (string-width str) len) (string-width str)))
-    str))
+(defun shorten-default-directory (len)
+  (let ((d (abbreviate-file-name default-directory)))
+    (if (> (string-width d) len)
+        (concat
+         "…"
+         (substring d (- (string-width str) len) (string-width d)))
+      d)))
 
 (defun shrink-replace (short long)
   (if (or (< (window-width) (frame-width))
@@ -120,7 +118,7 @@ directory, if not, return file's directory"
 (defvar i-bar/dir
   '(:eval
     (list
-     (let ((dir (shorten-string-suffix (relative-directory default-directory) 30))
+     (let ((dir (shorten-default-directory 60))
            (cface (if (buffer-file-name)
                       (progn
                         (if (file-directory)

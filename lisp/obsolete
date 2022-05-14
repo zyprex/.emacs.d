@@ -1,6 +1,6 @@
-;;; i-lib-dump.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
+;;; obsolete -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
-;;    My library, utilities function or macro for emacs dumped.
+;;    obsolete stuffs for emacs which were dumped here.
 ;;
 ;;; Code:
 
@@ -256,8 +256,25 @@
 ;;   ;; p C
 ;;   (add-hook 'calendar-today-visible-hook 'calendar-mark-today))
 
+;; (defun ido-find-tag ()
+;;   "Find a tag using ido"
+;;   (interactive)
+;;   (tags-completion-table)
+;;   (let (tags-names)
+;;     (mapc (lambda (x)
+;; 	    (unless (integerp x)
+;; 	      (push (prin1-to-string x t) tags-names)))
+;; 	  tags-completion-table)
+;;     (xref-find-definitions (ido-completing-read "TAGS:" tags-names))))
+
+;; (defun exex-cmd ()
+;;   "Call `execute-extended-command' the default way."
+;;   (interactive)
+;;   (let ((completion-styles '(basic partial-completion emacs22)))
+;;     (call-interactively 'execute-extended-command)))
+
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
 
-;;; i-lib-dump.el ends here
+;;; obsolete ends here

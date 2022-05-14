@@ -1,12 +1,13 @@
 ;;; i-net.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
-;;    Function:
+;;    Functions:
 ;;    1. Extract webpage as pure text and show in temp buffer
 ;;    2. Use company and web apis to give english suggestion
 ;;
 ;;; Code:
 (require 'company)
 (require 'json)
+(require 'button)
 
 ;;;
 ;;; webcut
@@ -122,9 +123,24 @@
 (defmacro webcut-define--out (name url &optional arg1 arg2 subst-pair)
   `(defun ,(intern (concat "webcut-" name)) ()
      (interactive)
-     (webcut--out
-      ,name
-      (prepare-query-url ,url) ,arg1 ,arg2 ,subst-pair)))
+     (let ((url (prepare-query-url ,url))
+           (bufname (concat "*webcut-" ,name "*")))
+       (webcut--out
+        ,name url ,arg1 ,arg2 ,subst-pair)
+       (webcut-insert-origin-link bufname url))))
+
+(defun webcut-insert-origin-link (bufname link)
+  (with-selected-window (get-buffer-window bufname)
+    (read-only-mode  0)
+    (goto-char (point-max))
+    (insert "\n")
+    (insert-button
+     link
+     'action (lambda (_) (eww link))
+     'follow-link t
+     'face 'link)
+    (read-only-mode 1)
+    (goto-char (point-min))))
 
 ;;;###autoload
 (webcut-define--out
@@ -169,9 +185,8 @@
 ;;;###autoload
 (defun webcut-moedict ()
   (interactive)
-  (let* ((pl
-          (fetch-json-from-url
-           (prepare-query-url "https://www.moedict.tw/a/%s.json")))
+  (let* ((url (prepare-query-url "https://www.moedict.tw/a/%s.json"))
+         (pl (fetch-json-from-url url))
          (title-str (plist-get pl :t))
          (def (aref (plist-get pl :h) 0))
          (pinyin-str (plist-get def :p))
@@ -191,7 +206,8 @@
                           translation-str)))
     (temp-scratch-buffer
      "*webcut-moedict*"
-     (subst-each str-out '(("~`" . "") ("`" . "") ("~" . ""))))))
+     (subst-each str-out '(("~`" . "") ("`" . "") ("~" . ""))))
+    (webcut-insert-origin-link "*webcut-moedict*" url)))
 ;; https://www.moedict.tw/a/%E8%90%8C.json
 
 

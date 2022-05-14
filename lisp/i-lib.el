@@ -51,7 +51,6 @@
           (kill-buffer buffer)))))
 
 (defun clear-register-alist () (interactive) (setq register-alist '()))
-;; (defun clear-recentf-list () (interactive) (setq recentf-list '()))
 
 (defun move-line-down ()
   (interactive)
@@ -101,24 +100,22 @@ use `fc-list | fzf` search all fonts"
     (set-face-attribute 'default nil :height 140) ; unit 1/10pt
     (set-face-attribute 'mode-line nil :height 100)
     (set-face-attribute 'mode-line-inactive nil :height 100)
-    ;; font family
+    ;; default font for every frames
     (set-frame-font
-     (guess-font '("CamingoCode" "Consolas" "DejaVu Sans Mono")))
+     (guess-font '("CamingoCode" "Source Code Pro" "Consolas" "DejaVu Sans Mono"))
+     t t)
     (set-face-font
      'fixed-pitch
-     (guess-font '("Fixedsys" "Consolas" "Inconsolata")))
-    (set-fontset-font
-     t 'unicode (guess-font '("Symbola" "Segoe UI Symbol")))
-    (set-fontset-font
-     t 'symbol (guess-font '("Symbola" "Segoe UI Symbol")))
+     (guess-font '("Fixedsys" "Courier" "Inconsolata")))
     (set-fontset-font
      t 'han
-     (guess-font '("楷体" "Microsoft JhengHei" "微软雅黑" "SC 等距更纱黑体"
-                   "黑体" "Noto Sans CJK")))
+     (guess-font '("楷体" "SC 等距更纱黑体" "黑体" "Noto Sans CJK")))
     (set-fontset-font
-     t '(#x1f300 . #x1fad0)
-     (guess-font '("Noto Color Emoji" "Noto Emoji" "Segoe UI Emoji"
-                   "Symbola" "Apple Color Emoji")))))
+     t 'symbol
+     (guess-font '("Segoe UI Symbol" "Symbola")))
+    (set-fontset-font
+     t 'emoji
+     (guess-font '("Segoe UI Emoji" "Symbola")))))
 
 (defun package-get ()
   "Install selected package from list `package-list'"
@@ -134,16 +131,6 @@ use `fc-list | fzf` search all fonts"
       (when (not (require 'pkg nil 'noerror))
         (throw 'e (package-get))))))
 
-;; (defun ido-find-tag ()
-;;   "Find a tag using ido"
-;;   (interactive)
-;;   (tags-completion-table)
-;;   (let (tags-names)
-;;     (mapc (lambda (x)
-;; 	    (unless (integerp x)
-;; 	      (push (prin1-to-string x t) tags-names)))
-;; 	  tags-completion-table)
-;;     (xref-find-definitions (ido-completing-read "TAGS:" tags-names))))
 
 (defmacro ft-init-function (regex fn)
   "Run file type function, when the open file match the REGEX"
@@ -178,12 +165,6 @@ use `fc-list | fzf` search all fonts"
 
 (cl-defmethod project-files ((project (head local)) &optional dirs)
   (mapcan #'project-fd (or dirs (list (project-root project)))))
-
-(defun exex-cmd ()
-  "Call `execute-extended-command' the default way."
-  (interactive)
-  (let ((completion-styles '(basic partial-completion emacs22)))
-    (call-interactively 'execute-extended-command)))
 
 (defmacro def-ex-prog-cmd (cmd-name where)
   "Define the command that execute exteral program"

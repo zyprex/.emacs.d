@@ -190,7 +190,7 @@
     ;; (if cursor-in-non-selected-windows
     ;;     (setq-local cursor-in-non-selected-windows t))
     (lvf-build-source)
-    (setq lvf-run-timer (run-with-idle-timer 1 30 'lvf-run-fn))
+    (setq lvf-run-timer (run-with-idle-timer 0.7 300 'lvf-run-fn))
     (add-to-history
      'lvf-history
      (read-from-minibuffer ">" nil lvf-minibuffer-map nil 'lvf-history))
@@ -210,7 +210,8 @@
   "Define common lvf run function. Note the STR-LIST should alwauys be a string
 list"
   `(let ((input (minibuffer-contents-no-properties)))
-     (if (not (string= lvf-last-input input))
+     (if (and (not (string= lvf-last-input input))
+              (minibufferp (current-buffer)))
          (progn
            (lvf-display
             (concat-list-to-string
@@ -384,12 +385,14 @@ PAD is padding space length"
            (setq d-list
                  (append d-list (list (file-name-directory f))))))
      (setq tbuf-list (delete lvf-buffer-name tbuf-list))
+     (if (buffer-file-name (get-buffer (car pbuf)))
+         (setq buf-list (append buf-list pbuf))
+       (setq tbuf-list (append tbuf-list pbuf)))
      (str-list--add-prefix "B|" buf-list)
-     (str-list--add-prefix "B|" pbuf)
      (str-list--add-prefix "B|" tbuf-list)
      (str-list--add-prefix "F|" f-list)
      (str-list--add-prefix "D|" d-list)
-     (setq lvf-cache (append buf-list pbuf tbuf-list f-list d-list))
+     (setq lvf-cache (append buf-list f-list d-list tbuf-list))
      (setq lvf-leave-early nil)
      (setq lvf-prefix-len 2))))
 
@@ -418,12 +421,13 @@ PAD is padding space length"
   (setq lvf-cache ""))
 
 (defun lvf-rg--run-fn ()
-  (let ((input (minibuffer-contents-no-properties)))
-    (if (not (string= lvf-last-input input))
-        (progn
-          (lvf-display
-           (shell-command-to-string (concat "rg --vimgrep " input)))
-          (setq lvf-last-input input)))))
+  (when (minibufferp (current-buffer))
+    (let ((input (minibuffer-contents-no-properties)))
+      (if (not (string= lvf-last-input input))
+          (progn
+            (lvf-display
+             (shell-command-to-string (concat "rg --vimgrep " input)))
+            (setq lvf-last-input input))))))
 
 (defun lvf-rg--act-fn ()
   (let* ((result-list (split-string lvf-result ":"))
@@ -449,12 +453,13 @@ PAD is padding space length"
   (setq lvf-cache ""))
 
 (defun lvf-fd--run-fn ()
-  (let ((input (minibuffer-contents-no-properties)))
-    (if (not (string= lvf-last-input input))
-        (progn
-          (lvf-display
-           (shell-command-to-string (concat "fd -t f " input " .")))
-          (setq lvf-last-input input)))))
+  (when (minibufferp (current-buffer))
+    (let ((input (minibuffer-contents-no-properties)))
+      (if (not (string= lvf-last-input input))
+          (progn
+            (lvf-display
+             (shell-command-to-string (concat "fd -t f " input " .")))
+            (setq lvf-last-input input))))))
 
 (defun lvf-fd--act-fn ()
   (find-file-other-window lvf-result))

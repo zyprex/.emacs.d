@@ -187,7 +187,7 @@ use `fc-list | fzf` search all fonts"
       (progn
         (local-set-key [f2] arg)
         (message "F2 bind to command: %s" arg))
-    (local-set-key [f2] last-command)
+    (global-set-key [f2] last-command)
     (message "F2 bind to last command: %s" last-command)))
 
 (defun get-buffers-same-mode (mode)
@@ -214,16 +214,48 @@ use `fc-list | fzf` search all fonts"
 
 (define-fn-continuous "other-window-prev" (kbd "i") (other-window -1))
 (define-fn-continuous "other-window-next" (kbd "o") (other-window 1))
-(define-fn-continuous "next-buffer" (kbd "j") (next-buffer))
-(define-fn-continuous "prev-buffer" (kbd "k") (previous-buffer))
+(define-fn-continuous "prev-file-buffer" (kbd "k") (prev-file-buffer))
+(define-fn-continuous "next-file-buffer" (kbd "j") (next-file-buffer))
+(define-fn-continuous "prev-nofile-buffer" (kbd "h") (prev-nofile-buffer))
+(define-fn-continuous "next-nofile-buffer" (kbd "l") (next-nofile-buffer))
+
+(defun switch-to-match-buffer (regex change-buffer)
+;; https://emacs.stackexchange.com/questions/17687/make-previous-buffer-and-next-buffer-to-ignore-some-buffers
+  "Call CHANGE-BUFFER until regex does match."
+  (let ((initial (current-buffer)))
+    (funcall change-buffer)
+    (let ((first-change (current-buffer)))
+      (catch 'loop
+        (while (not (string-match-p regex (buffer-name)))
+          (funcall change-buffer)
+          (when (eq (current-buffer) first-change)
+            (switch-to-buffer initial)
+            (throw 'loop t)))))))
+
+(defun prev-file-buffer ()
+  (interactive)
+  (switch-to-match-buffer "^[^*]" 'previous-buffer))
+(defun next-file-buffer ()
+  (interactive)
+  (switch-to-match-buffer "^[^*]" 'next-buffer))
+(defun prev-nofile-buffer ()
+  (interactive)
+  (switch-to-match-buffer "\\*" 'previous-buffer))
+(defun next-nofile-buffer ()
+  (interactive)
+  (switch-to-match-buffer "\\*" 'next-buffer))
 
 (defvar window-layout-list '() "Store windows layouts")
+
 
 (defun save-window-layout ()
   "Save current window layout to alias (a char)"
   (interactive)
   (let ((i '(:alias nil :name nil :layout nil))
-        (ch (read-char "Set current windows layout alias (press one key)...")))
+        (ch (read-char (concat
+                        (window-layout--prompt-string "Save: ")
+                        (propertize " (press one key...)"
+                                    'face 'font-lock-comment-face)))))
     ;; clear duplicates
     (dolist (l window-layout-list)
       (if (= ch (plist-get l :alias))
@@ -233,9 +265,7 @@ use `fc-list | fzf` search all fonts"
     (setq i (plist-put i :layout (current-window-configuration)))
     (add-to-list 'window-layout-list (copy-tree i))))
 
-(defun load-window-layout ()
-  "Load a window layout from `window-layout-list'"
-  (interactive)
+(defun window-layout--prompt-string (type)
   (let* ((echo-prompt
           (mapcar
            (lambda (x)
@@ -250,11 +280,26 @@ use `fc-list | fzf` search all fonts"
            (lambda (str1 str2)
              (< (string-to-char (substring str1 0 1))
                 (string-to-char (substring str2 0 1))))))
-         (echo-prompt (mapconcat (lambda (x) x) echo-prompt " "))
+         (echo-prompt (mapconcat (lambda (x) x) echo-prompt " ")))
+    (concat type echo-prompt)))
+
+(defun load-window-layout ()
+  "Load a window layout from `window-layout-list'"
+  (interactive)
+  (let* ((echo-prompt (window-layout--prompt-string "Load: "))
          (ch (read-char echo-prompt)))
     (dolist (l window-layout-list)
       (if (= ch (plist-get l :alias))
           (set-window-configuration (plist-get l :layout))))))
+
+(defun delete-window-layout ()
+  "Delete a saved window layout from `window-layout-list'"
+  (interactive)
+  (let* ((echo-prompt (window-layout--prompt-string "Delete: "))
+         (ch (read-char echo-prompt)))
+    (dolist (l window-layout-list)
+      (if (= ch (plist-get l :alias))
+          (setq window-layout-list (remove l window-layout-list))))))
 
 (provide 'i-lib)
 

@@ -168,6 +168,7 @@
   (define-key minibuffer-local-map (kbd "C-c v") 'fido-vertical-mode)
   ;; imenu
   ;; (setq imenu-use-popup-menu nil)
+  ;; (setq display-buffer-alist '((".*" display-buffer-same-window)))
   (message "Done: init-settings-defaults"))
 
 (defun icomplete-completion-styles-setup ()
@@ -177,18 +178,24 @@
 (defun init-settings-keymaps ()
   (global-set-key-list
    '(("M-;" nil) ;; prefix key
+     ;; misc bindings
      ("M-; M-;" comment-dwim)
-     ("M-; m" bookmark-set)
-     ;; ("M-; w" winner-undo)
-     ;; ("M-; W" winner-redo)
+     ("M-; ." imenu)
+     ;; ("M-; m" bookmark-set)
+     ;; ("M-; M" bookmark-delete)
+     ;; windows relative bindings
      ("M-; c" delete-other-windows)
      ("M-; C" delete-window)
-     ("M-; h" save-window-layout)
-     ("M-; l" load-window-layout)
-     ("M-; j" next-buffer-continuous)
-     ("M-; k" prev-buffer-continuous)
+     ("M-; M-w" save-window-layout)
+     ("M-; w" load-window-layout)
+     ("M-; W" delete-window-layout)
+     ("M-; h" prev-nofile-buffer-continuous)
+     ("M-; l" next-nofile-buffer-continuous)
+     ("M-; k" prev-file-buffer-continuous)
+     ("M-; j" next-file-buffer-continuous)
      ("M-; o" other-window-next-continuous)
      ("M-; i" other-window-prev-continuous)
+     ;; file relative bindings
      ("M-; b" switch-to-buffer)
      ("M-; M-b" switch-to-buffer-other-window)
      ("M-; <SPC>b" ibuffer)
@@ -197,6 +204,7 @@
      ("M-; M-f" find-file-other-window)
      ("M-; <SPC>f" dired)
      ("M-; <SPC>M-f" dired-other-window)
+     ;; lvf relative bindings
      ("M-; //" lvf-run)
      ("M-; /l" lvf-line)
      ("M-; /i" lvf-imenu)
@@ -204,29 +212,16 @@
      ("M-; /g" lvf-rg)
      ("M-; /f" lvf-fd)
      ("M-; /h" lvf-loadhist)
-     ("M-; ?" imenu)
-     ;; see `windmove-default-keybindings'
-     ;; ([left]  windmove-left)
-     ;; ([right] windmove-right)
-     ;; ([up]    windmove-up)
-     ;; ([down]  windmove-down)
      ;; adjust defaults
      ("M-; M-:" eval-region)
      ("M-; M-z" zap-up-to-char)
      ("C-^" mode-line-other-buffer) ; the vim-way
      ("M-/" hippie-expand)
      ("<escape>" keyboard-escape-quit) ; same as C-g
-     ;; need functions in ~/.emacs.d/lisp/i-lib.el
-     ("<C-return>"   open-line-below)
-     ("<S-return>"   open-line-below)
-     ("<C-S-return>" open-line-above)
-     ("<C-S-up>"     move-line-up)
-     ("<C-S-down>"   move-line-down)
-     ("<C-S-right>"  duplicate-line)
+     ;; edit relative bindings
+     ("M-; M-k" open-line-above)
+     ("M-; M-j" open-line-below)
      ("M-; d" duplicate-line)
-     ("M-; M-x" exex-cmd)
-     ;; ("M-; M-s" isearch-window-forward)
-     ;; ("M-; M-r" isearch-window-backward)
      ("M-n" rabbit-jump-forward)
      ("M-p" rabbit-jump-backward)
      ("M-; M-n" rabbit-jump-bot)

@@ -140,6 +140,7 @@
         lazy-count-suffix-format " [%s/%s]")
   ;; enforce UTF-8 as the default encoding for all files
   (prefer-coding-system 'utf-8)
+  ;; (set-language-environment-charset 'unicode)
   ;; (set-default-coding-systems 'utf-8)
   ;; (set-terminal-coding-system 'utf-8)
   ;; (set-keyboard-coding-system 'utf-8)
@@ -168,6 +169,21 @@
   (define-key minibuffer-local-map (kbd "C-c v") 'fido-vertical-mode)
   ;; imenu
   ;; (setq imenu-use-popup-menu nil)
+  (setq hippie-expand-try-functions-list
+        '(try-expand-all-abbrevs
+          try-complete-file-name
+          try-complete-file-name-partially
+          try-expand-line
+          try-expand-line-all-buffers
+          try-expand-dabbrev-visible
+          try-expand-dabbrev
+          try-expand-dabbrev-all-buffers
+          try-expand-dabbrev-from-kill
+          try-expand-list
+          try-expand-list-all-buffers
+          try-complete-lisp-symbol
+          try-complete-lisp-symbol-partially
+          try-expand-whole-kill))
   ;; (setq display-buffer-alist '((".*" display-buffer-same-window)))
   (message "Done: init-settings-defaults"))
 

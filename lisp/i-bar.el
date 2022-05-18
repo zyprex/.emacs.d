@@ -74,39 +74,46 @@ directory, if not, return file's directory"
 (defmacro i-bar-defface (name body docstring)
   `(defface ,(intern (format "i-bar/%s-face" name))
      ,body
-     ,(format "Face used for show %s" docstring)
+     ,(format "Face used for show %s in mode line" docstring)
      :group 'i-bar))
 
 (i-bar-defface "dir-true"
                '((t (:inherit 'font-lock-string-face)))
-               "true directory path in mode line")
+               "true directory path")
 (i-bar-defface "dir-untrue"
                '((t (:inherit 'i-bar/dir-true-face :inverse-video t)))
-               "untrue directory path in mode line")
+               "untrue directory path")
+(i-bar-defface "dir-prj"
+               '((t (:inherit 'font-lock-constant-face :weight bold)))
+               "current project type")
+(i-bar-defface "dir-prj-path"
+               '((t (:inherit 'font-lock-constant-face)))
+               "current project path")
 (i-bar-defface "mo"
                '((t (:foreground "Red" :weight bold)))
-               "modified state in mode line")
+               "modified state")
 (i-bar-defface "ro"
                '((t (:foreground "goldenrod" :weight bold)))
-               "read-only in mode line")
+               "read-only")
 (i-bar-defface "bname-mo"
                '((t (:inherit 'mode-line-buffer-id :inverse-video t)))
                "modified buffer name")
 (i-bar-defface "ime"
                '((t (:foreground "chartreuse1")))
-               "IME in mode line")
+               "IME")
 (i-bar-defface "major-mode"
                '((t (:inherit 'font-lock-type-face :weight bold)))
-               "major-mode in mode line")
+               "major-mode")
 (i-bar-defface "minor-mode"
                '((t (:inherit 'font-lock-comment-face :weight bold)))
-               "minor-mode in mode line")
+               "minor-mode")
 (i-bar-defface "pos"
                '((nil ()))
-               "position in mode line")
+               "position")
 (i-bar-defface "pos-region"
                '((t (:inherit 'mode-line-emphasis :inverse-video t)))
-               "position in mode line")
+               "position of region")
+
 
 (defvar i-bar/dir-keymap
   (let ((map (make-sparse-keymap)))
@@ -114,6 +121,41 @@ directory, if not, return file's directory"
     (define-key map [mode-line mouse-2] 'copy-file-path)
     (define-key map [mode-line mouse-3] 'cd)
       map))
+
+(defun i-bar/dir-prj (cface)
+  (let* ((root (cdr (project-current)))
+         (type (symbol-name (car (project-current))))
+         (path (string-replace root ""
+                               (abbreviate-file-name default-directory))))
+  (list (propertize type
+                    'face 'i-bar/dir-prj-face
+                    'help-echo root)
+        " "
+        (propertize (shrink-replace
+                     (str-displayable-fallback "○" "^") root)
+                    'face 'i-bar/dir-prj-path-face
+                    'help-echo
+                    (purecopy (concat "Default directory:" default-directory
+"\nmouse-1: cd buffer directory\n\
+nouse-2: copy buffer file path\n\
+mouse-3: cd other directory"))
+                    'mouse-face 'mode-line-highlight
+                    'local-map i-bar/dir-keymap)
+        (propertize (shrink-replace "" path)
+                    'face cface))))
+
+(defun i-bar/dir-norm (cface)
+  (propertize (shrink-replace
+               (str-displayable-fallback "○" "^")
+               dir)
+              'face cface
+              'help-echo
+              (purecopy (concat "Default directory:" default-directory
+"\nmouse-1: cd buffer directory\n\
+nouse-2: copy buffer file path\n\
+mouse-3: cd other directory"))
+              'mouse-face 'mode-line-highlight
+              'local-map i-bar/dir-keymap))
 
 (defvar i-bar/dir
   '(:eval
@@ -123,20 +165,11 @@ directory, if not, return file's directory"
                       (progn
                         (if (file-directory)
                             'i-bar/dir-untrue-face
-                        'i-bar/dir-true-face))
+                          'i-bar/dir-true-face))
                     nil)))
-       (propertize (shrink-replace
-                    (str-displayable-fallback "○" "^")
-                    dir)
-                   'face cface
-                   'help-echo
-                   (purecopy (concat "Default directory:"
-                                     default-directory
-"\nmouse-1: cd buffer directory\n\
-nouse-2: copy buffer file path\n\
-mouse-3: cd other directory"))
-                   'mouse-face 'mode-line-highlight
-                   'local-map i-bar/dir-keymap))))
+       (if (project-current)
+           (i-bar/dir-prj cface)
+         (i-bar/dir-norm cface)))))
   "Show directory in current buffer")
 
 (defvar i-bar/bname
@@ -300,6 +333,14 @@ mouse-3: Toggle minor modes"
               (put x 'risky-local-variable t)))
       (cdr i-bar-format))
 (setq-default mode-line-format i-bar-format)
+
+(with-eval-after-load "flymake"
+  (setq flymake-mode-line-format
+        '(:eval
+          (when flymake-mode
+            '(" [" flymake-mode-line-error-counter
+              flymake-mode-line-warning-counter
+              flymake-mode-line-note-counter "]")))))
 
 (provide 'i-bar)
 

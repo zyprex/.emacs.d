@@ -155,6 +155,7 @@ use `fc-list | fzf` search all fonts"
   (if-let ((root (locate-dominating-file dir ".project")))
       (cons 'local root)))
 (add-hook 'project-find-functions 'project-try-local 50)
+(add-hook 'project-find-functions 'project-try-vc 50)
 
 (cl-defmethod project-root ((project (head local))) (cdr project))
 

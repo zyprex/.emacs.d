@@ -88,7 +88,8 @@
 (global-undo-tree-mode)
 (setq undo-tree-mode-lighter ""
       undo-tree-auto-save-history t
-      undo-tree-history-directory-alist '(("" . "~/.cache/emacs/undo")))
+      undo-tree-history-directory-alist '(("" . "~/.cache/emacs/undo"))
+      undo-tree-visualizer-timestamps t)
 ;; ========================================
 ;;                evil
 ;; https://evil.readthedocs.io/en/latest/overview.html

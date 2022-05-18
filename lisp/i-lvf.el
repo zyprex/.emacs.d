@@ -50,6 +50,7 @@
 ;; Buffer context var of lvf
 (defvar lvf-buffer nil "lvf buffer object")
 (defvar lvf-prev-buffer nil "lvf previous buffer object")
+(defvar lvf-sync-dir nil "sync previous buffer's directory to lvf")
 
 ;; Render lvf-buffer
 (defvar lvf-overlay nil "lvf highlight overlay")
@@ -185,8 +186,16 @@
       (if (eq (current-buffer) lvf-buffer)
           (throw 'e (message "USE LVF IN LVF BUFFER")))
       (setq lvf-prev-buffer (current-buffer))
-      (if (not (window-live-p (get-buffer-window lvf-buffer)))
-          (switch-to-buffer-other-window lvf-buffer t)))
+      (setq lvf-sync-dir
+            (if (project-current)
+                (cdr (project-current))
+              default-directory)))
+    ;; Ensure to select lvf buffer
+    (if (window-live-p (get-buffer-window lvf-buffer))
+        (select-window (get-buffer-window lvf-buffer))
+      (switch-to-buffer-other-window lvf-buffer t))
+    (cd lvf-sync-dir)
+    ;; (buffer-local-value 'default-directory lvf-prev-buffer))))
     ;; (if cursor-in-non-selected-windows
     ;;     (setq-local cursor-in-non-selected-windows t))
     (lvf-build-source)
@@ -458,7 +467,8 @@ PAD is padding space length"
       (if (not (string= lvf-last-input input))
           (progn
             (lvf-display
-             (shell-command-to-string (concat "fd -t f " input " .")))
+             (shell-command-to-string
+              (concat "fd -t f " input)))
             (setq lvf-last-input input))))))
 
 (defun lvf-fd--act-fn ()

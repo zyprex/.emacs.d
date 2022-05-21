@@ -1,6 +1,6 @@
 ;;; i-lvf.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
-;;    Live View Filter, it suppose to replacement the ioccur
+;;    Live View Filter, it suppose be a lite replacement of ioccur
 ;;
 ;;; Code:
 (require 'imenu)
@@ -190,10 +190,9 @@
             (if (project-current)
                 (cdr (project-current))
               default-directory)))
+    (display-buffer-at-bottom lvf-buffer '((window-height . 0.25)))
     ;; Ensure to select lvf buffer
-    (if (window-live-p (get-buffer-window lvf-buffer))
-        (select-window (get-buffer-window lvf-buffer))
-      (switch-to-buffer-other-window lvf-buffer t))
+    (select-window (get-buffer-window lvf-buffer))
     (cd lvf-sync-dir)
     ;; (buffer-local-value 'default-directory lvf-prev-buffer))))
     ;; (if cursor-in-non-selected-windows
@@ -244,7 +243,7 @@ list"
     (if out-list out-list '(""))))
 
 (defun concat-list-to-string (str-list sp)
-  (mapconcat (lambda (x) x) str-list sp))
+  (mapconcat #'identity str-list sp))
 
 (defun get-buf-str-list (buf)
   (with-current-buffer buf
@@ -312,9 +311,11 @@ PAD is padding space length"
 
 (defun lvf-imenu--build-source ()
   (with-lvf-prev-buffer-window
+   (setq imenu-auto-rescan t)
+   (imenu--make-index-alist t)
    (let ((min-pad 1)
          (out-alist '())
-         (imenu-alist (imenu--make-index-alist)))
+         (imenu-alist imenu--index-alist))
      ;; find min padding length
      (dolist (v imenu-alist)
        (if (listp (cdr v))
@@ -337,7 +338,7 @@ PAD is padding space length"
      ;; (message "%s" out-alist)
      ;; (dolist (v out-alist) (message "%s" (car v)))
      (setq lvf-leave-early nil)
-     (setq lvf-prefix-len (string-match "[^ ] " (car (car out-alist))))
+     (setq lvf-prefix-len (1- min-pad))
      (setq lvf-cache out-alist))))
 
 (defun lvf-imenu--run-fn ()
@@ -363,36 +364,39 @@ PAD is padding space length"
 
 (defun lvf-recentf--build-source ()
   (with-lvf-prev-buffer-window
-   (let ((pbuf  (list (buffer-name (car (buffer-list)))))
+   (let ((pbuf (list (buffer-name (car (buffer-list)))))
          (buf-list '())
          (tbuf-list '())
          (f-list '())
          (d-list '()))
+     ;; buffers
      (dolist (b (cdr (buffer-list)))
        (if (buffer-file-name b)
            (setq buf-list
                  (append buf-list (list (buffer-name b))))
-         (if (not (string-match-p " \\*" (buffer-name b)))
+         (if (not (string-match-p "^ " (buffer-name b)))
              (setq tbuf-list
                    (append tbuf-list (list (buffer-name b)))))))
+     ;; recent files
      (dolist (f recentf-list)
-       (if (not (member (get-file-buffer f) (buffer-list)))
+       (unless (member (get-file-buffer f) (buffer-list))
            (setq f-list
                  (append f-list (list (abbreviate-file-name f)))))
-       (if (not (member (file-name-directory f) d-list))
+       (unless (member (abbreviate-file-name (file-name-directory f)) d-list)
            (setq d-list
                  (append d-list (list (abbreviate-file-name
                                        (file-name-directory f)))))))
+     ;; files from history
      (dolist (f file-name-history)
-       (if (and (file-exists-p f)
-                (not (member (get-file-buffer f) (buffer-list)))
-                (not (member f f-list)))
+       ;; (file-exists-p nil) cause error
+       (when (file-exists-p f)
+         (unless (or (member (get-file-buffer f) (buffer-list))
+                     (member f f-list))
            (setq f-list
                  (append f-list (list f))))
-       (if (and (file-exists-p (file-name-directory f))
-                (not (member (file-name-directory f) d-list)))
+         (unless (member (file-name-directory f) d-list)
            (setq d-list
-                 (append d-list (list (file-name-directory f))))))
+                 (append d-list (list (file-name-directory f)))))))
      (setq tbuf-list (delete lvf-buffer-name tbuf-list))
      (if (buffer-file-name (get-buffer (car pbuf)))
          (setq buf-list (append buf-list pbuf))
@@ -401,6 +405,7 @@ PAD is padding space length"
      (str-list--add-prefix "B|" tbuf-list)
      (str-list--add-prefix "F|" f-list)
      (str-list--add-prefix "D|" d-list)
+     ;; delete-dups
      (setq lvf-cache (append buf-list f-list d-list tbuf-list))
      (setq lvf-leave-early nil)
      (setq lvf-prefix-len 2))))
@@ -547,4 +552,5 @@ PAD is padding space length"
 (lvf-define-type "loadhist")
 
 (provide 'i-lvf)
+
 ;;; i-lvf.el ends here

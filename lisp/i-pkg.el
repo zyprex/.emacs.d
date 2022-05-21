@@ -13,7 +13,6 @@
     company-web
     company-fuzzy
     company
-    imenu-list
     dim
     eglot
     manage-minor-mode

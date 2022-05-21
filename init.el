@@ -30,6 +30,7 @@
      (require 'i-lvf) ;; ~/.emacs.d/lisp/i-lvf.el
      (require 'i-jmp) ;; ~/.emacs.d/lisp/i-jmp.el
      (require 'i-net) ;; ~/.emacs.d/lisp/i-net.el
+     (require 'i-oak) ;; ~/.emacs.d/lisp/i-oak.el
      (setq inhibit-message nil)
      (setq emacs-prepare-time (float-time (time-since emacs-prepare-time)))
      (message (format "Emacs is armed to the teeth in %.6f seconds"

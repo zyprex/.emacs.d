@@ -106,7 +106,7 @@ use `fc-list | fzf` search all fonts"
      t t)
     (set-face-font
      'fixed-pitch
-     (guess-font '("Fixedsys" "Courier" "Inconsolata")))
+     (guess-font '("Courier New" "Inconsolata")))
     (set-fontset-font
      t 'han
      (guess-font '("楷体" "SC 等距更纱黑体" "黑体" "Noto Sans CJK")))

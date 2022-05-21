@@ -341,3 +341,5 @@
     (meta (bing-hover arg))))
 
 (provide 'i-net)
+
+;;; i-net.el ends here

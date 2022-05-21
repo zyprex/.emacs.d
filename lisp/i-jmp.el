@@ -151,3 +151,5 @@ the data means [char-code1 char-code1-position char-code2 char-code2-position
   (zoom-to-char--transient-map))
 
 (provide 'i-jmp)
+
+;;; i-jmp.el ends here

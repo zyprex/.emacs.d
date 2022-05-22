@@ -1,6 +1,6 @@
 ;;; i-jmp.el -*- mode: emacs-lisp; coding: utf-8; lexical-binding: t -*-
 ;;; Commentary:
-;;    jump to a char
+;;    jump to char or line
 ;;
 ;;; Code:
 
@@ -123,32 +123,56 @@ the data means [char-code1 char-code1-position char-code2 char-code2-position
             (rabbit-jump-build-table (window-start) (window-end)) -1)
   (rabbit-jump--transient-map 'rabbit-jump-backward-repeat))
 
-(defmacro zoom-to-char--transient-map ()
-  `(set-transient-map
-    (let ((kmap (make-sparse-keymap)))
-      (define-key kmap (kbd (char-to-string zoom-current-char))
-        (lambda ()
-          (interactive)
-          (zoom-to-char-next zoom-current-char)))
-      kmap)))
-
 ;;;###autoload
 (defun zoom-to-char ()
   (interactive)
-  (make-local-variable 'zoom-current-char)
-  (setq-local zoom-current-char (read-char))
-  (zoom-to-char-next zoom-current-char)
-  (zoom-to-char--transient-map))
+  (zoom-to-char-next (read-char "zoom-to-char:")))
 
-(defun zoom-to-char-next (char)
-  (let ((ch char)
-        (cur (1+ (point))))
-    (while (and (not (eq ch (char-after cur)))
-                (< cur (window-end)))
+(defun zoom-to-char-next (c)
+  (let ((cur (1+ (point))))
+    (while (and (not (eq c (char-after cur)))
+                (< cur (point-max)))
       (setq cur (1+ cur)))
-    (if (eq ch (char-after cur))
+    (if (eq c (char-after cur))
         (goto-char cur)))
-  (zoom-to-char--transient-map))
+  (zoom-to-char--transient-map c))
+
+(defmacro zoom-to-char--transient-map (c)
+  `(set-transient-map
+    (let ((kmap (make-sparse-keymap)))
+      (define-key kmap (kbd (char-to-string ,c))
+        (lambda ()
+          (interactive)
+          (zoom-to-char-next ,c)))
+      kmap)))
+
+;;;###autoload
+(defun goto-line-by-last-digit ()
+  (interactive)
+  (let* ((n (- (read-char "0-9:") 48)))
+    (when (and (> n -1) (< n 10))
+      (goto-line-by-last-digit-repeat n))))
+
+(defun goto-line-by-last-digit-repeat (n)
+  (let ((start-line (line-number-at-pos (window-start)))
+        (end-line (1- (line-number-at-pos (window-end))))
+        (next-line (1+ (line-number-at-pos))))
+    (while (not (= (% next-line 10) n))
+      (setq next-line (1+ next-line))
+      (if (> next-line end-line)
+          (setq next-line start-line)))
+    (goto-char (point-min))
+    (forward-line (1- next-line))
+    (goto-line-by-last-digit--transient-map n)))
+
+(defmacro goto-line-by-last-digit--transient-map (n)
+  `(set-transient-map
+    (let ((kmap (make-sparse-keymap)))
+      (define-key kmap (kbd (char-to-string (+ ,n 48)))
+        (lambda ()
+          (interactive)
+          (goto-line-by-last-digit-repeat ,n)))
+      kmap)))
 
 (provide 'i-jmp)
 

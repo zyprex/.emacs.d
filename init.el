@@ -244,6 +244,7 @@
      ("M-; M-n" rabbit-jump-bot)
      ("M-; M-p" rabbit-jump-top)
      ("M-'" zoom-to-char)
+     ("M-; g" goto-line-by-last-digit)
      ([f2] nil) ;; redefined
      ;; ([f5] nil)
      ;; ([f6] nil)

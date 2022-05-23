@@ -146,6 +146,7 @@
 ;;                eglot
 ;; ========================================
 (setq eglot-send-changes-idle-time 1)
+;; (setq eglot-events-buffer-size 0)
 ;; ========================================
 ;;                web-mode
 ;;         https://web-mode.org/

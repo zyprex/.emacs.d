@@ -198,7 +198,7 @@
     ;; (if cursor-in-non-selected-windows
     ;;     (setq-local cursor-in-non-selected-windows t))
     (lvf-build-source)
-    (setq lvf-run-timer (run-with-idle-timer 0.7 300 'lvf-run-fn))
+    (setq lvf-run-timer (run-with-idle-timer 0.7 60 'lvf-run-fn))
     (add-to-history
      'lvf-history
      (read-from-minibuffer ">" nil lvf-minibuffer-map nil 'lvf-history))
@@ -377,30 +377,22 @@ PAD is padding space length"
          (if (not (string-match-p "^ " (buffer-name b)))
              (setq tbuf-list
                    (append tbuf-list (list (buffer-name b)))))))
-     ;; recent files
-     (dolist (f recentf-list)
-       (unless (member (get-file-buffer f) (buffer-list))
-           (setq f-list
-                 (append f-list (list (abbreviate-file-name f)))))
-       (unless (member (abbreviate-file-name (file-name-directory f)) d-list)
-           (setq d-list
-                 (append d-list (list (abbreviate-file-name
-                                       (file-name-directory f)))))))
-     ;; files from history
-     (dolist (f file-name-history)
-       ;; (file-exists-p nil) cause error
-       (when (file-exists-p f)
-         (unless (or (member (get-file-buffer f) (buffer-list))
-                     (member f f-list))
-           (setq f-list
-                 (append f-list (list f))))
-         (unless (member (file-name-directory f) d-list)
-           (setq d-list
-                 (append d-list (list (file-name-directory f)))))))
-     (setq tbuf-list (delete lvf-buffer-name tbuf-list))
+     ;; recent files + file name history
+     (dolist (f (append recentf-list file-name-history))
+       (let ((fname (abbreviate-file-name f)))
+         (when (file-exists-p fname)
+           (if (file-directory-p fname)
+               (unless (member fname d-list)
+                 (setq d-list (append d-list (list fname))))
+             (unless (member fname f-list)
+               (setq f-list (append f-list (list fname)))
+               (unless (member (file-name-directory fname) d-list)
+                 (setq d-list
+                       (append d-list (list (file-name-directory fname))))))))))
      (if (buffer-file-name (get-buffer (car pbuf)))
          (setq buf-list (append buf-list pbuf))
        (setq tbuf-list (append tbuf-list pbuf)))
+     (setq tbuf-list (delete lvf-buffer-name tbuf-list))
      (str-list--add-prefix "B|" buf-list)
      (str-list--add-prefix "B|" tbuf-list)
      (str-list--add-prefix "F|" f-list)

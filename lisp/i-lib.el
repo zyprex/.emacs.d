@@ -302,6 +302,17 @@ use `fc-list | fzf` search all fonts"
       (if (= ch (plist-get l :alias))
           (setq window-layout-list (remove l window-layout-list))))))
 
+(defmacro with-emacs-dumb-launch (&optional body)
+  "Run BODY when emacs start up with no file and no input after 1 sec.
+Example;
+(defun emacs-dumb-launch ()
+  (with-emacs-dumb-launch
+   ...
+   ))
+Define the function in local init file, such as `init-local.el`."
+  `(when (equal "*scratch*" (buffer-name (current-buffer)))
+     (unless (read-event nil nil 1) ,body)))
+
 (provide 'i-lib)
 
 ;;; i-lib.el ends here

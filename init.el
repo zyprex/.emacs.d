@@ -35,7 +35,7 @@
      (setq emacs-prepare-time (float-time (time-since emacs-prepare-time)))
      (message (format "Emacs is armed to the teeth in %.6f seconds"
                       emacs-prepare-time))
-     ))
+     (emacs-ready)))
   (run-with-idle-timer
    9 nil
    (lambda ()
@@ -47,6 +47,14 @@
      (setq confirm-kill-emacs 'yes-or-no-p)))
   (message "Done: after-init-setup"))
 (add-hook 'after-init-hook 'after-init-setup)
+
+(defvar emacs-ready-hook nil "Main configuration end in emacs-ready-hook")
+
+(defun emacs-ready ()
+  (run-hooks 'emacs-ready-hook))
+
+;; see `with-emacs-dumb-launch'
+(add-hook 'emacs-ready-hook 'emacs-dumb-launch)
 
 (defun init-settings-delay ()
   ;; global minor mode
@@ -188,10 +196,6 @@
   ;; (setq display-buffer-alist '((".*" display-buffer-same-window)))
   (message "Done: init-settings-defaults"))
 
-(defun icomplete-completion-styles-setup ()
-  (setq-local completion-styles '(initials flex)))
-(add-hook 'icomplete-minibuffer-setup-hook 'icomplete-completion-styles-setup)
-
 (defun init-settings-keymaps ()
   (global-set-key-list
    '(("M-;" nil) ;; prefix key
@@ -270,14 +274,12 @@
         eshell-directory-name        (local-data "eshell/")
         auto-save-list-file-prefix   (local-data "auto-save-list/.saves-")
         project-list-file            (local-data "projects"))
-  (if (boundp 'native-comp-eln-load-path)
-      (progn
-	(setq native-comp-eln-load-path(append (list (local-data "eln-cache/"))
-                                               native-comp-eln-load-path))
-  (setq native-comp-eln-load-path (delete (expand-file-name "eln-cache/" user-emacs-directory)
-                                          native-comp-eln-load-path))))
-
-
+  (when (boundp 'native-comp-eln-load-path)
+    (setq native-comp-eln-load-path (append (list (local-data "eln-cache/"))
+                                           native-comp-eln-load-path))
+    (setq native-comp-eln-load-path (delete (expand-file-name
+                                             "eln-cache/" user-emacs-directory)
+                                            native-comp-eln-load-path)))
   (defvar local-init-file (locate-user-emacs-file "init-local.el")
     "Local emacs lisp for temporary use")
   (if (file-exists-p local-init-file)
@@ -328,6 +330,11 @@
 
 ;;; MAJOR MODE HOOKS
 
+;; icomplete
+(defun icomplete-completion-styles-setup ()
+  (setq-local completion-styles '(initials flex)))
+(add-hook 'icomplete-minibuffer-setup-hook 'icomplete-completion-styles-setup)
+
 ;; eshell
 (defun eshell-setup ()
   "Setup for eshell"
@@ -363,7 +370,7 @@
 ;; (with-eval-after-load 'dired
 ;; (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 (setq dired-listing-switches "-alh")
-(add-hook 'dired-mode-hook 'dired-hide-details-mode) ;; use ( toggle
+(add-hook 'dired-mode-hook 'dired-hide-details-mode) ;; use '(' toggle
 
 ;; ibuffer
 (with-eval-after-load 'ibuffer

@@ -313,6 +313,18 @@ Define the function in local init file, such as `init-local.el`."
   `(when (equal "*scratch*" (buffer-name (current-buffer)))
      (unless (read-event nil nil 1) ,body)))
 
+(defun insert-things-from-prev-window (&optional type)
+  (interactive
+   (list (completing-read
+          "Type to insert:"
+          '(symbol list sexp defun filename existing-filename url email uuid
+                   word sentence whitespace line number page))))
+  (unless (string= type "")
+    (let ((content ""))
+      (with-selected-window (previous-window)
+        (setq content (thing-at-point (intern type) t)))
+      (insert content))))
+
 (provide 'i-lib)
 
 ;;; i-lib.el ends here

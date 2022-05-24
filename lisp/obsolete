@@ -273,6 +273,18 @@
 ;;   (let ((completion-styles '(basic partial-completion emacs22)))
 ;;     (call-interactively 'execute-extended-command)))
 
+;; (defun i-abb/insert-date (prefix)
+;;   ;; https://www.emacswiki.org/emacs/InsertDate
+;;   "Insert the current date. With prefix-argument, use ISO format. With
+;;    two prefix arguments, write out the day and month name."
+;;   (interactive "P")
+;;   (let ((format
+;;          (cond
+;;           ((not prefix) "%c")
+;;           ((eq prefix 1) "%Y-%m-%d")
+;;           ((eq prefix 2) "%A, %d. %B %Y"))))
+;;     (insert (format-time-string format))))
+
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:

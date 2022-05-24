@@ -201,7 +201,6 @@
    '(("M-;" nil) ;; prefix key
      ;; misc bindings
      ("M-; M-;" comment-dwim)
-     ("M-; ." imenu)
      ;; ("M-; m" bookmark-set)
      ;; ("M-; M" bookmark-delete)
      ;; windows relative bindings
@@ -249,6 +248,7 @@
      ("M-; M-p" rabbit-jump-top)
      ("M-'" zoom-to-char)
      ("M-; g" goto-line-by-last-digit)
+     ("M-; ." insert-things-from-prev-window)
      ([f2] nil) ;; redefined
      ;; ([f5] nil)
      ;; ([f6] nil)

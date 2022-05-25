@@ -12,8 +12,8 @@
           (message "Copied: '%s'" f)))))
 
 (defun file-directory ()
-  "Check whether the default directory is not in current file's
-directory, if not, return file's directory"
+  "Check whether the default directory is not in current file's directory, if
+not, return file's directory."
   (if (buffer-file-name)
     (let* ((dir (file-name-directory (buffer-file-name))))
       (if (string-equal (expand-file-name default-directory)
@@ -23,11 +23,11 @@ directory, if not, return file's directory"
     nil))
 
 (defun file-modified-p ()
-  "True file changed"
+  "True file changed."
   (and (buffer-file-name) (buffer-modified-p)))
 
 (defun cd-file-directory ()
-  "Change directory use `file-directory'true"
+  "Change directory use `file-directory'."
   (interactive)
   (if (file-directory)
       (cd (file-directory))))
@@ -147,7 +147,7 @@ mouse-3: cd other directory"))
 (defun i-bar/dir-norm (cface)
   (propertize (shrink-replace
                (str-displayable-fallback "○" "^")
-               dir)
+               (shorten-default-directory 60))
               'face cface
               'help-echo
               (purecopy (concat "Default directory:" default-directory
@@ -160,8 +160,7 @@ mouse-3: cd other directory"))
 (defvar i-bar/dir
   '(:eval
     (list
-     (let ((dir (shorten-default-directory 60))
-           (cface (if (buffer-file-name)
+     (let ((cface (if (buffer-file-name)
                       (progn
                         (if (file-directory)
                             'i-bar/dir-untrue-face
@@ -170,7 +169,7 @@ mouse-3: cd other directory"))
        (if (project-current)
            (i-bar/dir-prj cface)
          (i-bar/dir-norm cface)))))
-  "Show directory in current buffer")
+  "Show directory in current buffer.")
 
 (defvar i-bar/bname
   '(:eval
@@ -338,7 +337,14 @@ mouse-3: Toggle minor modes"
   (setq flymake-mode-line-format
         '(:eval
           (when flymake-mode
-            '(" [" flymake-mode-line-error-counter
+            '((:eval
+               (propertize
+                (str-displayable-fallback " ◆" " flymake")
+                'help-echo "mouse-1： flymake-show-buffer-diagnostics"
+                'mouse-face 'mode-line-highlight
+                'local-map (make-mode-line-mouse-map
+                            'mouse-1 #'flymake-show-buffer-diagnostics)))
+              "[" flymake-mode-line-error-counter
               flymake-mode-line-warning-counter
               flymake-mode-line-note-counter "]")))))
 

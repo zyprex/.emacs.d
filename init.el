@@ -379,7 +379,8 @@
         ibuffer-default-sorting-reversep t)
   (setq ibuffer-saved-filter-groups
         '(("Home"
-           ("Emacs-config" (filename . ".emacs.d"))
+           ("Emacs-config" (and (filename . ".emacs.d")
+                                (predicate buffer-file-name (current-buffer))))
            ("Docs" (or (mode . org-mode)
                        (mode . markdown-mode)))
            ("Dired" (mode . dired-mode))

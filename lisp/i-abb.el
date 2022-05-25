@@ -13,7 +13,8 @@
       ("i" "(interactive)" "")
       ("l" "(lambda (" "))")))
     ((lisp-interaction-mode)
-     (("time" (lambda () (insert (format-time-string "%A, %d %B %Y"))))
+     (("date" (lambda () (insert (format-time-string "%A, %d %B %Y"))))
+      ("time" (lambda () (insert (format-time-string "%H:%M:%S"))))
       ("me" "(macroexpand-1 '(" "))")))
     ((markdown-mode)
      (("i" "_" "_" t)
@@ -39,6 +40,7 @@
      (("i" "/" "/")
       ("b" "*" "*")
       ("c" "~" "~")
+      ("C" "=" "=")
       ("s" "+" "+")
       ("fn" "[[]][[" "]]")
       ("img" "#+CAPTION:\n#+NAME:\n[[" "]]")
@@ -60,6 +62,7 @@
     ((java-mode)
      (("pr" "System.out.println(" ");")
       ("cl" "class " "{\n}")
+      ("tr" "try {\n" "\n} catch (Exception e) {\ne.printStackTrace();\n}")
       ("ma" "public static void main(String[] args){\n" "\n}")))
     ((c-mode cc-mode js-mode web-mode java-mode)
      (("do" "do {\n" "\n} while(0);")
@@ -91,7 +94,7 @@
   (interactive)
   (with-output-to-temp-buffer "*abb*"
     (dolist (i (abb-list-templates))
-      (princ (format "%s\t\t-->\t\t%s_%s\n"
+      (princ (format "%s\t\t-->\t\t%s%s\n"
                      (car i)
                      (car (cdr i))
                      (car (cdr (cdr i))))))
@@ -127,7 +130,7 @@
          (s (abb-get-template (car id)))
          (last-end-point (point)))
     (when s
-      (kill-region beg (point))
+      (delete-region beg (point))
       (cond
        ((stringp (car s))
         (insert (nth 0 s) (nth 1 s))

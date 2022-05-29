@@ -122,6 +122,8 @@
       (setq start (1- start)))
     (when (member (char-after start) stop)
       (setq start (1+ start)))
+    (when (= start 0)
+      (setq start 1))
     (cons (buffer-substring-no-properties start (point)) start)))
 
 (defun abb-expand ()

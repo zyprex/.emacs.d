@@ -564,6 +564,11 @@ PAD is padding space length"
 ;;;###autoload
 (lvf-define-type "loadhist")
 
+;;;
+;;; lvf loadvar
+;;;
+;; (dolist (v (font-family-list)) (princ v))
+
 (provide 'i-lvf)
 
 ;;; i-lvf.el ends here

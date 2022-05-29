@@ -93,7 +93,7 @@
 
 (defun gui-font-set ()
   "Set GUI font, this func should be load after theme load,
-use `fc-list | fzf` search all fonts"
+use `fc-list | fzf` search all fonts."
   (interactive)
   (when (display-graphic-p)
     ;; font size
@@ -109,7 +109,7 @@ use `fc-list | fzf` search all fonts"
      (guess-font '("Courier New" "Inconsolata")))
     (set-fontset-font
      t 'han
-     (guess-font '("楷体" "SC 等距更纱黑体" "黑体" "Noto Sans CJK")))
+     (guess-font '("HanaMinA" "楷体" "SC 等距更纱黑体" "黑体" "Noto Sans CJK")))
     (set-fontset-font
      t 'symbol
      (guess-font '("Segoe UI Symbol" "Symbola")))

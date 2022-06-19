@@ -59,8 +59,6 @@ not, return file's directory."
    ((eq major-mode 'inferior-emacs-lisp-mode) "IEL")
    ((eq major-mode 'lisp-interaction-mode) "LI")
    ((eq major-mode 'emacs-lisp-mode) "EL")
-   ((eq major-mode 'c-mode) "C")
-   ((eq major-mode 'c++-mode) "Cpp")
    ((eq major-mode 'markdown-mode) "Md")
    ((eq major-mode 'text-mode) "Txt")
    ((eq major-mode 'fundamental-mode) "?")
